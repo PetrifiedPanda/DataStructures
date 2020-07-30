@@ -286,7 +286,7 @@ TreeNode<T>* BinarySearchTree<T>::findNode(const T& key) {  // O(h)
 }
 
 template <typename T>
-void BinarySearchTree<T>::transplant(TreeNode<T>* toDelete, TreeNode<T>* replacement) {  // O(1) Do not use, it is shit
+void BinarySearchTree<T>::transplant(TreeNode<T>* toDelete, TreeNode<T>* replacement) {  // This does not work, and I still need to find out why
     std::unique_ptr<TreeNode<T>> replacementUnique = (replacement != nullptr) ? std::move(getUnique(replacement)) : nullptr;
     replacement = replacementUnique.get();
 

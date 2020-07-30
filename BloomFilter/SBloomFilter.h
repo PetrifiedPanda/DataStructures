@@ -1,6 +1,5 @@
 #pragma once
 
-#include <bitset>
 #include <cmath>
 #include <functional>
 #include <vector>
