@@ -1,6 +1,9 @@
 # DataStructures
-A C++ implementation of various data structures I learned in university. My approach (which may not be the best) was to try to give the user no access that would make them be able to break the structure. (i.e. not giving them direct access to the Nodes of a LinkedList, etc.). I have yet to exhaustively test most of these.
+A C++ implementation of various data structures I learned in university. My approach (which may not be the best) was to try to give the user no access that would make them be able to break the structure. (i.e. not giving them direct access to the Nodes of a LinkedList, etc.). I have yet to exhaustively test most of these.<br/>
 I am currently not happy with some of the implementations (i.e. some of the iterators).
+<br/>
+<br/>
+I would really appreciate some feedback from anyone that may stumble on this.
 
 ## LinkedList
 This template class is implemented using Nodes with std::unique_ptr<> as the next node and a raw pointer as the previous node. 
