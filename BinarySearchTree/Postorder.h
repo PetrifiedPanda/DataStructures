@@ -25,7 +25,7 @@ TreeNode<T>* Postorder<T>::lastNode(const BinarySearchTree<T>& tree) const {  //
 }
 
 template <typename T>
-TreeNode<T>* Postorder<T>::getSuccessor(TreeNode<T>* currentNode, const BinarySearchTree<T>& tree) const {  // O(h) and not working
+TreeNode<T>* Postorder<T>::getSuccessor(TreeNode<T>* currentNode, const BinarySearchTree<T>& tree) const {  // This does not work yet
     if (currentNode == tree.root_.get())
         return nullptr;
 
