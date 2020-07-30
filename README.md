@@ -10,6 +10,8 @@ This template class is implemented using Nodes with std::unique_ptr<> as the nex
 Similarly, the head of the list is a std::unique_ptr<>, while the tail is a raw pointer. 
 The iterator for this class holds a raw pointer to a node and is incremented and decremented by setting the current node to the next or prev attribute of the node.
 The iterator also contains a reference to the original List, which I plan to change, because that makes the iterator non-reassignable.
+<br/>
+SizeLinkedList is a small attempt at making a LinkedList that saves its size in a variable. I did not work on that one too much.
 
 ## BinarySearchTree
 This one is implemented using std::unique_ptr<> as the left and right child and a raw pointer as the parent node.
