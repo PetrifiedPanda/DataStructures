@@ -6,7 +6,7 @@ template <typename T>
 class BinarySearchTree;
 
 template <typename T>
-class TreeTraversal {
+class TreeTraversal {  // TODO: Give this a Reference to the tree this is supposed to traverse and remove the reference from the iterator
    public:
     TreeTraversal() {}
     virtual TreeNode<T>* startNode(const BinarySearchTree<T>& tree) const = 0;
