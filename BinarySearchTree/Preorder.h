@@ -20,7 +20,7 @@ TreeNode<T>* Preorder<T>::startNode(const BinarySearchTree<T>& tree) const {  //
 
 template <typename T>
 TreeNode<T>* Preorder<T>::lastNode(const BinarySearchTree<T>& tree) const {  // O(h)
-    return tree.maxSubtree(tree.root_.get());
+    return tree.subtreeMax(tree.root_.get());
 }
 
 template <typename T>

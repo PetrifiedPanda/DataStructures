@@ -16,7 +16,7 @@ class Postorder : public TreeTraversal<T> {
 
 template <typename T>
 TreeNode<T>* Postorder<T>::startNode(const BinarySearchTree<T>& tree) const {  // O(h)
-    return tree.minSubtree(tree.root_.get());
+    return tree.subtreeMin(tree.root_.get());
 }
 
 template <typename T>

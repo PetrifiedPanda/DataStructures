@@ -47,12 +47,17 @@ class BinarySearchTree {
 
     void setTraversal(Traversal trav);
 
-    iterator find(const T& key);
+    size_t computeHeight() const;
+    size_t computeSize() const;
 
-    iterator min();
-    iterator max();
-    T minKey();
-    T maxKey();
+    iterator find(const T& key) const;
+
+    iterator min() const;
+    iterator max() const;
+    T minKey() const;
+    T maxKey() const;
+    T extractMax();
+    T extractMin();
 
     iterator begin() const;
     iterator end() const;
@@ -60,8 +65,11 @@ class BinarySearchTree {
    private:
     void erase(TreeNode<T>* toDelete);
 
-    TreeNode<T>* minSubtree(TreeNode<T>* subTreeRoot) const;
-    TreeNode<T>* maxSubtree(TreeNode<T>* subTreeRoot) const;
+    size_t subtreeHeight(TreeNode<T>* subTreeRoot) const;
+    size_t subtreeSize(TreeNode<T>* subTreeRoot) const;
+
+    TreeNode<T>* subtreeMin(TreeNode<T>* subTreeRoot) const;
+    TreeNode<T>* subtreeMax(TreeNode<T>* subTreeRoot) const;
 
     std::unique_ptr<TreeNode<T>>& getUnique(TreeNode<T>* node);
 
@@ -164,30 +172,56 @@ void BinarySearchTree<T>::setTraversal(Traversal trav) {
 }
 
 template <typename T>
-typename BinarySearchTree<T>::iterator BinarySearchTree<T>::find(const T& key) {
+size_t BinarySearchTree<T>::computeHeight() const {
+    return subtreeHeight(root_.get());
+}
+
+template <typename T>
+size_t BinarySearchTree<T>::computeSize() const {
+    return subtreeSize(root_.get());
+}
+
+template <typename T>
+typename BinarySearchTree<T>::iterator BinarySearchTree<T>::find(const T& key) const {
     return iterator(findNode(key), *this, enumToTrav(traversal_));
 }
 
 // Min / Max functions
 
 template <typename T>
-typename BinarySearchTree<T>::iterator BinarySearchTree<T>::min() {  // O(h)
-    return iterator(minSubtree(root_.get()), *this, enumToTrav(traversal_));
+typename BinarySearchTree<T>::iterator BinarySearchTree<T>::min() const {  // O(h)
+    return iterator(subtreeMin(root_.get()), *this, enumToTrav(traversal_));
 }
 
 template <typename T>
-typename BinarySearchTree<T>::iterator BinarySearchTree<T>::max() {  // O(h)
-    return iterator(maxSubtree(root_.get()), *this, enumToTrav(traversal_));
+typename BinarySearchTree<T>::iterator BinarySearchTree<T>::max() const {  // O(h)
+    return iterator(subtreeMax(root_.get()), *this, enumToTrav(traversal_));
 }
 
 template <typename T>
-T BinarySearchTree<T>::minKey() {
-    return minSubtree(root_.get())->key;
+T BinarySearchTree<T>::minKey() const {
+    return subtreeMin(root_.get())->key;
 }
 
 template <typename T>
-T BinarySearchTree<T>::maxKey() {
-    return maxSubtree(root_.get())->key;
+T BinarySearchTree<T>::maxKey() const {
+    return subtreeMax(root_.get())->key;
+}
+
+template <typename T>
+T BinarySearchTree<T>::extractMin() {
+    iterator minIt = min();
+    T key = *minIt;
+    erase(minIt);
+    return key;
+}
+
+template <typename T>
+T BinarySearchTree<T>::extractMax() {
+    iterator maxIt = max();
+    T key = *maxIt;
+    erase(maxIt);
+    return key;
 }
 
 // Begin / End function
@@ -211,7 +245,7 @@ void BinarySearchTree<T>::erase(TreeNode<T>* toDelete) {  // O(h)
     else if (toDelete->right == nullptr)
         transplant(toDelete, toDelete->left);
     else {
-        TreeNode<T>* replacement = minSubtree(toDelete->right.get());
+        TreeNode<T>* replacement = subtreeMin(toDelete->right.get());
 
         if (replacement->parent != toDelete) {
             TreeNode<T>* rParent = replacement->parent;
@@ -242,7 +276,23 @@ void BinarySearchTree<T>::erase(TreeNode<T>* toDelete) {  // O(h)
 // private utility
 
 template <typename T>
-TreeNode<T>* BinarySearchTree<T>::minSubtree(TreeNode<T>* subTreeRoot) const {  // O(h)
+size_t BinarySearchTree<T>::subtreeHeight(TreeNode<T>* subtreeRoot) const {
+    if (subtreeRoot == nullptr)
+        return 0;
+
+    return std::max(subtreeHeight(subtreeRoot->right.get()), subtreeHeight(subtreeRoot->left.get())) + 1;
+}
+
+template <typename T>
+size_t BinarySearchTree<T>::subtreeSize(TreeNode<T>* subtreeRoot) const {
+    if (subtreeRoot == nullptr)
+        return 0;
+
+    return subtreeSize(subtreeRoot->right.get()) + subtreeSize(subtreeRoot->left.get()) + 1;
+}
+
+template <typename T>
+TreeNode<T>* BinarySearchTree<T>::subtreeMin(TreeNode<T>* subTreeRoot) const {  // O(h)
     TreeNode<T>* it = subTreeRoot;
 
     while (it != nullptr && it->left != nullptr)
@@ -252,7 +302,7 @@ TreeNode<T>* BinarySearchTree<T>::minSubtree(TreeNode<T>* subTreeRoot) const {  
 }
 
 template <typename T>
-TreeNode<T>* BinarySearchTree<T>::maxSubtree(TreeNode<T>* subTreeRoot) const {  // O(h)
+TreeNode<T>* BinarySearchTree<T>::subtreeMax(TreeNode<T>* subTreeRoot) const {  // O(h)
     TreeNode<T>* it = subTreeRoot;
 
     while (it != nullptr && it->right != nullptr)
