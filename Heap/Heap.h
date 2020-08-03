@@ -132,7 +132,7 @@ T Heap<T>::extractExtremum() {
     T max = data_[0];
     data_[0] = data_[data_.size() - 1];
     data_.erase(--data_.end());
-    biDirHeapify(0);
+    downHeapify(0);
     return max;
 }
 
