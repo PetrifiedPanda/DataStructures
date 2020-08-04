@@ -25,7 +25,8 @@ class BinarySearchTree {
     };
 
    private:
-    mutable Traversal traversal_;  // The setTraversal() function should stay non-const while every function that modifies this should reset it after usage
+    // The setTraversal() function should stay non-const while every const function that modifies this should reset it after usage
+    mutable Traversal traversal_;
 
     Inorder<T> inorder;
     Preorder<T> preorder;
