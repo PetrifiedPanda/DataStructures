@@ -1,5 +1,7 @@
 #pragma once
 
+#include <functional>
+
 #include "Inorder.h"
 #include "Postorder.h"
 #include "Preorder.h"
@@ -23,7 +25,7 @@ class BinarySearchTree {
     };
 
    private:
-    Traversal traversal_;
+    mutable Traversal traversal_;  // The setTraversal() function should stay non-const while every function that modifies this should reset it after usage
 
     Inorder<T> inorder;
     Preorder<T> preorder;
@@ -32,16 +34,30 @@ class BinarySearchTree {
    public:
     using iterator = TreeNodeIt<T>;
     BinarySearchTree(Traversal trav = INORDER) : root_(nullptr), traversal_(trav) {}
-    BinarySearchTree(BinarySearchTree<T>& tree);
+    BinarySearchTree(const BinarySearchTree<T>& tree);
     BinarySearchTree(BinarySearchTree<T>&& tree);
 
-    BinarySearchTree<T>& operator=(BinarySearchTree<T>& tree);
+    BinarySearchTree<T>& operator=(const BinarySearchTree<T>& tree);
     BinarySearchTree<T>& operator=(BinarySearchTree<T>&& tree);
 
     void insert(const T& key);
 
     void erase(const T& key);
     void erase(iterator it);
+
+    void forEach(const std::function<void(const T&)>& func, Traversal trav) const;
+
+    template <typename ReturnType>
+    ReturnType doWithTraversal(const std::function<ReturnType(const BinarySearchTree<T>&)>& func, Traversal trav) const {
+        Traversal oldTrav = traversal_;
+        traversal_ = trav;
+
+        ReturnType result = func(*this);
+
+        traversal_ = oldTrav;
+        return result;
+    }
+    void doWithTraversal(const std::function<void(const BinarySearchTree<T>&)>& func, Traversal trav) const;
 
     void clear();
 
@@ -84,14 +100,12 @@ class BinarySearchTree {
 // Constructors
 
 template <typename T>
-BinarySearchTree<T>::BinarySearchTree(BinarySearchTree<T>& tree) : BinarySearchTree<T>() {
-    Traversal trav = tree.traversal_;
-    tree.setTraversal(PREORDER);
-
-    for (const T& key : tree)
-        insert(key);
-
-    tree.setTraversal(trav);
+BinarySearchTree<T>::BinarySearchTree(const BinarySearchTree<T>& tree) : BinarySearchTree<T>() {
+    doWithTraversal([&](const BinarySearchTree<T>& tree) {
+        for (const T& key : tree)
+            insert(key);
+    },
+                    PREORDER);
 }
 
 template <typename T>
@@ -102,16 +116,14 @@ BinarySearchTree<T>::BinarySearchTree(BinarySearchTree<T>&& tree) : root_(std::m
 // Assignment operators
 
 template <typename T>
-BinarySearchTree<T>& BinarySearchTree<T>::operator=(BinarySearchTree<T>& tree) {
-    root_ = nullptr;
+BinarySearchTree<T>& BinarySearchTree<T>::operator=(const BinarySearchTree<T>& tree) {
+    clear();
 
-    Traversal trav = tree.traversal_;
-    tree.setTraversal(PREORDER);
-
-    for (const T& key : tree)
-        insert(key);
-
-    tree.setTraversal(trav);
+    doWithTraversal([&](const BinarySearchTree<T>& tree) {
+        for (const T& key : tree)
+            insert(key);
+    },
+                    PREORDER);
 }
 
 template <typename T>
@@ -157,6 +169,27 @@ template <typename T>
 void BinarySearchTree<T>::erase(iterator it) {
     if (it != end())
         erase(it.currentNode_);
+}
+
+template <typename T>
+void BinarySearchTree<T>::forEach(const std::function<void(const T&)>& func, Traversal trav) const {
+    Traversal prevTrav = traversal_;
+    traversal_ = trav;
+
+    for (const T& item : *this)
+        func(item);
+
+    traversal_ = prevTrav;
+}
+
+template <typename T>
+void BinarySearchTree<T>::doWithTraversal(const std::function<void(const BinarySearchTree<T>& tree)>& func, Traversal trav) const {
+    Traversal prevTrav = traversal_;
+    traversal_ = trav;
+
+    func(*this);
+
+    traversal_ = prevTrav;
 }
 
 // public Utility
