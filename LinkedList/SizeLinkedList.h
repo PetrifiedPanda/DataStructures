@@ -22,8 +22,8 @@ class SizeLinkedList : public LinkedList<T> {
     SizeLinkedList<T>& operator=(LinkedList<T>&& list);
     SizeLinkedList<T>& operator=(std::initializer_list<T> list);
 
-    void append(T key);
-    void insert(T key, iterator position);
+    void append(const T& key);
+    void insert(const T& key, iterator position);
 
     void erase(iterator position);
     void erase(iterator start, iterator end);
@@ -91,13 +91,13 @@ SizeLinkedList<T>& SizeLinkedList<T>::operator=(std::initializer_list<T> list) {
 // Insertion functions
 
 template <typename T>
-void SizeLinkedList<T>::append(T key) {
+void SizeLinkedList<T>::append(const T& key) {
     LinkedList<T>::append(key);
     ++size_;
 }
 
 template <typename T>
-void SizeLinkedList<T>::insert(T key, iterator position) {
+void SizeLinkedList<T>::insert(const T& key, iterator position) {
     LinkedList<T>::insert(key, position);
     ++size_;
 }
