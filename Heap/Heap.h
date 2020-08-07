@@ -69,7 +69,7 @@ template <typename T>
 Heap<T>::Heap(Heap<T>& heap) : data_(heap.data_), comparator_(heap.comparator_) {}
 
 template <typename T>
-Heap<T>::Heap(Heap<T>&& heap) : data_(std::move(heap.data_)), comparator_(std::move(heap.comparator_)) {}
+Heap<T>::Heap(Heap<T>&& heap) noexcept : data_(std::move(heap.data_)), comparator_(std::move(heap.comparator_)) {}
 
 // Equality operators
 
