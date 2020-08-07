@@ -47,6 +47,8 @@ class Heap {
     void downHeapify(size_t startIndex);
     void biDirHeapify(size_t startIndex);
 
+    void buildHeap();
+
     size_t left(size_t index);
     size_t right(size_t index);
     size_t parent(size_t index);
@@ -58,13 +60,8 @@ class Heap {
 
 template <typename T>
 Heap<T>::Heap(std::initializer_list<T> init, const std::function<bool(const T&, const T&)>& comp) : Heap(comp) {
-    data_.reserve(init.size());
-    for (const auto& item : init)
-        data_.push_back(item);
-
-    int size = init.size();
-    for (int i = ceil((size - 1) / 2) - 1; i > -1; --i)
-        downHeapify(i);
+    data_ = init;
+    buildHeap();
 }
 
 template <typename T>
@@ -91,23 +88,14 @@ Heap<T>& Heap<T>::operator=(Heap<T>&& heap) {
 
 template <typename T>
 Heap<T>& Heap<T>::operator=(std::initializer_list<T> init) {
-    data_.clear();
-    data_.reserve(init.size());
-    for (const auto& item : init)
-        data_.push_back(item);
-
-    int size = init.size();
-    for (int i = ceil((size - 1) / 2) - 1; i > -1; --i)
-        downHeapify(i);
+    data_ = init;
+    buildHeap();
 }
 
 template <typename T>
 void Heap<T>::setComparator(const std::function<bool(const T&, const T&)>& comp) {
     comparator_ = comp;
-
-    int size = data_.size();
-    for (int i = ceil((size - 1) / 2) - 1; i > -1; --i)
-        downHeapify(i);
+    buildHeap();
 }
 
 // Insert operation
@@ -212,7 +200,7 @@ void Heap<T>::biDirHeapify(size_t startIndex) {
     while (maxIndex != prevIndex) {
         prevIndex = maxIndex;
 
-        if (parent(prevIndex) >= 0 && parent(prevIndex) < data_.size() && !comparator_(data_[parent(prevIndex)], data_[maxIndex]))
+        if (parent(prevIndex) >= 0 && parent(prevIndex) < data_.size() && comparator_(data_[maxIndex], data_[parent(prevIndex)]))
             maxIndex = parent(prevIndex);
         else {
             if (left(prevIndex) < data_.size() && !comparator_(data_[maxIndex], data_[left(prevIndex)]))
@@ -225,6 +213,13 @@ void Heap<T>::biDirHeapify(size_t startIndex) {
         if (maxIndex != prevIndex)
             swap(prevIndex, maxIndex);
     }
+}
+
+template <typename T>
+void Heap<T>::buildHeap() {
+    int size = data_.size();
+    for (int i = ceil((size - 1) / 2.0) - 1; i > -1; --i)
+        downHeapify(i);
 }
 
 template <typename T>
