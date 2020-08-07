@@ -244,7 +244,7 @@ size_t Heap<T>::parent(size_t index) {
 
 template <typename T>
 void Heap<T>::swap(size_t i1, size_t i2) {
-    T tmp = data_[i1];
-    data_[i1] = data_[i2];
-    data_[i2] = tmp;
+    T tmp = std::move(data_[i1]);
+    data_[i1] = std::move(data_[i2]);
+    data_[i2] = std::move(tmp);
 }
