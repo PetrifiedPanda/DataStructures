@@ -32,6 +32,8 @@ class Heap {
 
     void erase(iterator it);
 
+    void clear();
+
     size_t size();
 
     iterator begin();
@@ -108,7 +110,7 @@ void Heap<T>::setComparator(const std::function<bool(const T&, const T&)>& comp)
         downHeapify(i);
 }
 
-// Insert / Erase operations
+// Insert operation
 
 template <typename T>
 void Heap<T>::insert(const T& key) {
@@ -120,6 +122,8 @@ void Heap<T>::insert(const T& key) {
         i = parent(i);
     }
 }
+
+// Delete operations
 
 template <typename T>
 T Heap<T>::extractExtremum() {
@@ -137,6 +141,11 @@ void Heap<T>::erase(iterator it) {
     data_.erase(--data_.end());
     if (deleteIndex != data_.size())
         biDirHeapify(deleteIndex);
+}
+
+template <typename T>
+void Heap<T>::clear() {
+    data_.clear();
 }
 
 template <typename T>
