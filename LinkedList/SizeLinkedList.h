@@ -10,11 +10,17 @@ class SizeLinkedList : public LinkedList<T> {
     using iterator = ListNodeIt<T>;
 
     SizeLinkedList() : LinkedList<T>(), size_(0) {}
-    SizeLinkedList(LinkedList<T>& list);
-    SizeLinkedList(SizeLinkedList<T>& list);
+    SizeLinkedList(const LinkedList<T>& list);
+    SizeLinkedList(const SizeLinkedList<T>& list);
     SizeLinkedList(LinkedList<T>&& list) noexcept;
     SizeLinkedList(SizeLinkedList<T>&& list) noexcept;
     SizeLinkedList(std::initializer_list<T> list);
+
+    SizeLinkedList<T>& operator=(const SizeLinkedList<T>& list);
+    SizeLinkedList<T>& operator=(const LinkedList<T>& list);
+    SizeLinkedList<T>& operator=(SizeLinkedList<T>&& list);
+    SizeLinkedList<T>& operator=(LinkedList<T>&& list);
+    SizeLinkedList<T>& operator=(std::initializer_list<T> list);
 
     void append(T key);
     void insert(T key, iterator position);
@@ -27,11 +33,13 @@ class SizeLinkedList : public LinkedList<T> {
     int size() const;
 };
 
-template <typename T>
-SizeLinkedList<T>::SizeLinkedList(LinkedList<T>& list) : LinkedList<T>(list), size_(list.computeSize()) {}
+// Constructor
 
 template <typename T>
-SizeLinkedList<T>::SizeLinkedList(SizeLinkedList<T>& list) : LinkedList<T>(list), size_(list.size()) {}
+SizeLinkedList<T>::SizeLinkedList(const LinkedList<T>& list) : LinkedList<T>(list), size_(list.computeSize()) {}
+
+template <typename T>
+SizeLinkedList<T>::SizeLinkedList(const SizeLinkedList<T>& list) : LinkedList<T>(list), size_(list.size()) {}
 
 template <typename T>
 SizeLinkedList<T>::SizeLinkedList(LinkedList<T>&& list) noexcept : LinkedList<T>(std::move(list)), size_(LinkedList<T>::computeSize()) {}
@@ -44,6 +52,40 @@ SizeLinkedList<T>::SizeLinkedList(std::initializer_list<T> list) {
     for (const auto& item : list)
         append(item);
 }
+
+// Assignment operators
+
+template <typename T>
+SizeLinkedList<T>& SizeLinkedList<T>::operator=(const SizeLinkedList<T>& list) {
+    LinkedList<T>::operator=(list);
+    size_ = list.size_;
+}
+
+template <typename T>
+SizeLinkedList<T>& SizeLinkedList<T>::operator=(const LinkedList<T>& list) {
+    LinkedList<T>::operator=(list);
+    size_ = LinkedList<T>::computeSize();
+}
+
+template <typename T>
+SizeLinkedList<T>& SizeLinkedList<T>::operator=(SizeLinkedList<T>&& list) {
+    LinkedList<T>::operator=(list);
+    size_ = list.size_;
+}
+
+template <typename T>
+SizeLinkedList<T>& SizeLinkedList<T>::operator=(LinkedList<T>&& list) {
+    LinkedList<T>::operator=(list);
+    size_ = LinkedList<T>::computeSize();
+}
+
+template <typename T>
+SizeLinkedList<T>& SizeLinkedList<T>::operator=(std::initializer_list<T> list) {
+    for (const auto& item : list)
+        append(item);
+}
+
+// Append / Insert operations
 
 template <typename T>
 void SizeLinkedList<T>::append(T key) {
