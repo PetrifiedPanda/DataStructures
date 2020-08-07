@@ -24,8 +24,8 @@ class LinkedList {
     LinkedList<T>& operator=(LinkedList<T>&& lst);
     LinkedList<T>& operator=(std::initializer_list<T> lst);
 
-    void append(T key);
-    void insert(T key, iterator position);
+    void append(const T& key);
+    void insert(const T& key, iterator position);
 
     void erase(iterator position);
     void erase(iterator start, iterator end);
@@ -97,7 +97,7 @@ LinkedList<T>& LinkedList<T>::operator=(std::initializer_list<T> lst) {
 // Insertion functions
 
 template <typename T>
-void LinkedList<T>::append(T key) {  // O(1)
+void LinkedList<T>::append(const T& key) {  // O(1)
     if (head_ == nullptr) {
         head_ = std::make_unique<ListNode<T>>(key);
         tail_ = head_.get();
@@ -109,7 +109,7 @@ void LinkedList<T>::append(T key) {  // O(1)
 }
 
 template <typename T>
-void LinkedList<T>::insert(T key, iterator position) {  // O(1)
+void LinkedList<T>::insert(const T& key, iterator position) {  // O(1)
     std::unique_ptr<ListNode<T>> newNode = std::make_unique<ListNode<T>>(key);
     if (head_ == nullptr) {
         head_ = std::move(newNode);
