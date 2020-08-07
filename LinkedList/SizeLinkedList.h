@@ -12,8 +12,8 @@ class SizeLinkedList : public LinkedList<T> {
     SizeLinkedList() : LinkedList<T>(), size_(0) {}
     SizeLinkedList(LinkedList<T>& list);
     SizeLinkedList(SizeLinkedList<T>& list);
-    SizeLinkedList(LinkedList<T>&& list);
-    SizeLinkedList(SizeLinkedList<T>&& list);
+    SizeLinkedList(LinkedList<T>&& list) noexcept;
+    SizeLinkedList(SizeLinkedList<T>&& list) noexcept;
     SizeLinkedList(std::initializer_list<T> list);
 
     void append(T key);
@@ -34,10 +34,10 @@ template <typename T>
 SizeLinkedList<T>::SizeLinkedList(SizeLinkedList<T>& list) : LinkedList<T>(list), size_(list.size()) {}
 
 template <typename T>
-SizeLinkedList<T>::SizeLinkedList(LinkedList<T>&& list) : LinkedList<T>(std::move(list)), size_(LinkedList<T>::computeSize()) {}
+SizeLinkedList<T>::SizeLinkedList(LinkedList<T>&& list) noexcept : LinkedList<T>(std::move(list)), size_(LinkedList<T>::computeSize()) {}
 
 template <typename T>
-SizeLinkedList<T>::SizeLinkedList(SizeLinkedList<T>&& list) : LinkedList<T>(std::move(list)), size_(list.size()) {}
+SizeLinkedList<T>::SizeLinkedList(SizeLinkedList<T>&& list) noexcept : LinkedList<T>(std::move(list)), size_(list.size()) {}
 
 template <typename T>
 SizeLinkedList<T>::SizeLinkedList(std::initializer_list<T> list) {

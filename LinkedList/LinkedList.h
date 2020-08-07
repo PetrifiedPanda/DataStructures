@@ -17,7 +17,7 @@ class LinkedList {
 
     LinkedList() : head_(nullptr), tail_(nullptr) {}
     LinkedList(const LinkedList<T>& lst);
-    LinkedList(LinkedList<T>&& lst);
+    LinkedList(LinkedList<T>&& lst) noexcept;
     LinkedList(std::initializer_list<T> lst);
 
     LinkedList<T>& operator=(const LinkedList<T>& lst);
@@ -51,7 +51,7 @@ LinkedList<T>::LinkedList(const LinkedList<T>& lst) : LinkedList() {
 }
 
 template <typename T>
-LinkedList<T>::LinkedList(LinkedList<T>&& lst) : head_(std::move(lst.head_)), tail_(lst.tail_) {
+LinkedList<T>::LinkedList(LinkedList<T>&& lst) noexcept : head_(std::move(lst.head_)), tail_(lst.tail_) {
     lst.head_ = nullptr;
     lst.tail_ = nullptr;
 }

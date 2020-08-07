@@ -10,7 +10,7 @@ class BloomFilter {
    public:
     BloomFilter(std::vector<std::function<size_t(const char&)>> hashes, size_t initSize) : data_(initSize, false), hashes_(std::move(hashes)) {}
     BloomFilter(const BloomFilter& filter) : data_(filter.data_), hashes_(filter.hashes_){};
-    BloomFilter(BloomFilter&& filter) : data_(std::move(filter.data_)), hashes_(std::move(filter.hashes_)) {}
+    BloomFilter(BloomFilter&& filter) noexcept : data_(std::move(filter.data_)), hashes_(std::move(filter.hashes_)) {}
 
     BloomFilter& operator=(const BloomFilter& filter);
     BloomFilter& operator=(BloomFilter&& filter);

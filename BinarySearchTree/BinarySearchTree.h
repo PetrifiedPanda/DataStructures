@@ -36,7 +36,7 @@ class BinarySearchTree {
     using iterator = TreeNodeIt<T>;
     BinarySearchTree(Traversal trav = INORDER) : root_(nullptr), traversal_(trav) {}
     BinarySearchTree(const BinarySearchTree<T>& tree);
-    BinarySearchTree(BinarySearchTree<T>&& tree);
+    BinarySearchTree(BinarySearchTree<T>&& tree) noexcept;
 
     BinarySearchTree<T>& operator=(const BinarySearchTree<T>& tree);
     BinarySearchTree<T>& operator=(BinarySearchTree<T>&& tree);
@@ -110,7 +110,7 @@ BinarySearchTree<T>::BinarySearchTree(const BinarySearchTree<T>& tree) : BinaryS
 }
 
 template <typename T>
-BinarySearchTree<T>::BinarySearchTree(BinarySearchTree<T>&& tree) : root_(std::move(tree.root_)) {
+BinarySearchTree<T>::BinarySearchTree(BinarySearchTree<T>&& tree) noexcept : root_(std::move(tree.root_)) {
     tree.root_ = nullptr;
 }
 
