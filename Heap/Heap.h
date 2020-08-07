@@ -17,16 +17,16 @@ class Heap {
     Heap(std::initializer_list<T> init, const std::function<bool(const T&, const T&)>& comp);
 
     Heap(Heap<T>& heap);
-    Heap(Heap<T>&& heap);
+    Heap(Heap<T>&& heap) noexcept;
 
-    Heap<T>& operator=(Heap<T>& heap);
+    Heap<T>& operator=(const Heap<T>& heap);
     Heap<T>& operator=(Heap<T>&& heap);
 
     Heap<T>& operator=(std::initializer_list<T> init);
 
     void setComparator(const std::function<bool(const T&, const T&)>& comp);
 
-    void insert(T key);
+    void insert(const T& key);
 
     T extractExtremum();
 
@@ -74,15 +74,9 @@ Heap<T>::Heap(Heap<T>&& heap) : data_(std::move(heap.data_)), comparator_(std::m
 // Equality operators
 
 template <typename T>
-Heap<T>& Heap<T>::operator=(Heap<T>& heap) {
-    data_.clear();
-    data_.reserve(heap.size());
-
-    for (const auto& item : heap)
-        data_.push_back(item);
-
+Heap<T>& Heap<T>::operator=(const Heap<T>& heap) {
+    data_ = heap.data_;
     comparator_ = heap.comparator_;
-
     return *this;
 }
 
@@ -117,7 +111,7 @@ void Heap<T>::setComparator(const std::function<bool(const T&, const T&)>& comp)
 // Insert / Erase operations
 
 template <typename T>
-void Heap<T>::insert(T key) {
+void Heap<T>::insert(const T& key) {
     data_.push_back(key);
 
     size_t i = data_.size() - 1;
