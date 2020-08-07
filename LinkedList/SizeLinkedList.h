@@ -31,6 +31,9 @@ class SizeLinkedList : public LinkedList<T> {
     void clear();
 
     int size() const;
+
+   private:
+    using LinkedList<T>::computeSize;
 };
 
 // Constructor
@@ -85,7 +88,7 @@ SizeLinkedList<T>& SizeLinkedList<T>::operator=(std::initializer_list<T> list) {
         append(item);
 }
 
-// Append / Insert operations
+// Insertion functions
 
 template <typename T>
 void SizeLinkedList<T>::append(T key) {
@@ -98,6 +101,8 @@ void SizeLinkedList<T>::insert(T key, iterator position) {
     LinkedList<T>::insert(key, position);
     ++size_;
 }
+
+// Deletion functions
 
 template <typename T>
 void SizeLinkedList<T>::erase(iterator position) {
