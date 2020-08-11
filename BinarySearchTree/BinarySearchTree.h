@@ -79,6 +79,16 @@ class BinarySearchTree {
     iterator begin() const;
     iterator end() const;
 
+   protected:
+    TreeNode<T>* insertAndReturnNewNode(const T& key);  // Change Name!
+
+    void rotateLeft(TreeNode<T>* node);
+    void rotateRight(TreeNode<T>* node);
+
+    TreeNode<T>* findNode(const T& key) const;
+
+    const TreeTraversal<T>* getTraversal() const;
+
    private:
     void erase(TreeNode<T>* toDelete);
 
@@ -90,12 +100,8 @@ class BinarySearchTree {
 
     std::unique_ptr<TreeNode<T>>& getUnique(TreeNode<T>* node);
 
-    TreeNode<T>* findNode(const T& key);
-
     void transplant(TreeNode<T>* toDelete, TreeNode<T>* replacement);
     void transplant(TreeNode<T>* toDelete, std::unique_ptr<TreeNode<T>>& replacement);
-
-    const TreeTraversal<T>* enumToTrav(Traversal trav) const;
 };
 
 // Constructors
@@ -139,24 +145,7 @@ BinarySearchTree<T>& BinarySearchTree<T>::operator=(BinarySearchTree<T>&& tree) 
 
 template <typename T>
 void BinarySearchTree<T>::insert(const T& key) {  // O(h)
-    TreeNode<T>* it = root_.get();
-    TreeNode<T>* itParent = nullptr;
-
-    while (it != nullptr) {
-        itParent = it;
-
-        if (it->key > key)
-            it = it->left.get();
-        else
-            it = it->right.get();
-    }
-
-    if (itParent == nullptr)
-        root_ = std::make_unique<TreeNode<T>>(key);
-    else if (itParent->key > key)
-        itParent->left = std::make_unique<TreeNode<T>>(key, itParent);
-    else
-        itParent->right = std::make_unique<TreeNode<T>>(key, itParent);
+    insertAndReturnNewNode(key);
 }
 
 template <typename T>
@@ -217,19 +206,19 @@ size_t BinarySearchTree<T>::computeSize() const {
 
 template <typename T>
 typename BinarySearchTree<T>::iterator BinarySearchTree<T>::find(const T& key) const {
-    return iterator(findNode(key), *this, enumToTrav(traversal_));
+    return iterator(findNode(key), *this, getTraversal());
 }
 
 // Min / Max functions
 
 template <typename T>
 typename BinarySearchTree<T>::iterator BinarySearchTree<T>::min() const {  // O(h)
-    return iterator(subtreeMin(root_.get()), *this, enumToTrav(traversal_));
+    return iterator(subtreeMin(root_.get()), *this, getTraversal());
 }
 
 template <typename T>
 typename BinarySearchTree<T>::iterator BinarySearchTree<T>::max() const {  // O(h)
-    return iterator(subtreeMax(root_.get()), *this, enumToTrav(traversal_));
+    return iterator(subtreeMax(root_.get()), *this, getTraversal());
 }
 
 template <typename T>
@@ -258,16 +247,134 @@ T BinarySearchTree<T>::extractMax() {
     return key;
 }
 
-// Begin / End function
+// Begin / End functions
 
 template <typename T>
 typename BinarySearchTree<T>::iterator BinarySearchTree<T>::begin() const {
-    return iterator(*this, enumToTrav(traversal_));
+    return iterator(*this, getTraversal());
 }
 
 template <typename T>
 typename BinarySearchTree<T>::iterator BinarySearchTree<T>::end() const {
-    return iterator(nullptr, *this, enumToTrav(traversal_));
+    return iterator(nullptr, *this, getTraversal());
+}
+
+template <typename T>
+TreeNode<T>* BinarySearchTree<T>::insertAndReturnNewNode(const T& key) {
+    TreeNode<T>* it = root_.get();
+    TreeNode<T>* itParent = nullptr;
+
+    while (it != nullptr) {
+        itParent = it;
+
+        if (it->key > key)
+            it = it->left.get();
+        else
+            it = it->right.get();
+    }
+
+    if (itParent == nullptr) {
+        root_ = std::make_unique<TreeNode<T>>(key);
+        return root_.get();
+    } else if (itParent->key > key) {
+        itParent->left = std::make_unique<TreeNode<T>>(key, itParent);
+        return itParent->left.get();
+    } else {
+        itParent->right = std::make_unique<TreeNode<T>>(key, itParent);
+        return itParent->right.get();
+    }
+}
+
+// Rotations
+
+template <typename T>
+void BinarySearchTree<T>::rotateLeft(TreeNode<T>* node) {
+    std::unique_ptr<TreeNode<T>> rightChild = std::move(node->right);
+    TreeNode<T>* rightChildPtr = rightChild.get();
+
+    if (rightChild->left != nullptr)
+        rightChild->left->parent = node;
+    node->right = std::move(rightChild->left);
+
+    if (node->parent == nullptr) {
+        std::unique_ptr<TreeNode<T>> nodeTmp = std::move(getUnique(node));
+        root_ = std::move(rightChild);
+        root_->left = std::move(nodeTmp);
+    } else {
+        TreeNode<T>* nodeParent = node->parent;
+        bool isLeftChild = false;
+        if (node == nodeParent->left.get())
+            isLeftChild = true;
+
+        std::unique_ptr<TreeNode<T>> nodeTmp = std::move(getUnique(node));
+        if (isLeftChild)
+            nodeParent->left = std::move(rightChild);
+        else
+            nodeParent->right = std::move(rightChild);
+
+        rightChildPtr->left = std::move(nodeTmp);
+    }
+    rightChildPtr->parent = node->parent;
+    node->parent = rightChildPtr;
+}
+
+template <typename T>
+void BinarySearchTree<T>::rotateRight(TreeNode<T>* node) {
+    std::unique_ptr<TreeNode<T>> leftChild = std::move(node->left);
+    TreeNode<T>* leftChildPtr = leftChild.get();
+
+    if (leftChild->right != nullptr)
+        leftChild->right->parent = node;
+    node->left = std::move(leftChild->right);
+
+    if (node->parent == nullptr) {
+        std::unique_ptr<TreeNode<T>> nodeTmp = std::move(getUnique(node));
+        root_ = std::move(leftChild);
+        root_->right = std::move(nodeTmp);
+    } else {
+        TreeNode<T>* nodeParent = node->parent;
+        bool isLeftChild = false;
+        if (node == nodeParent->left.get())
+            isLeftChild = true;
+
+        std::unique_ptr<TreeNode<T>> nodeTmp = std::move(getUnique(node));
+        if (isLeftChild)
+            nodeParent->left = std::move(leftChild);
+        else
+            nodeParent->right = std::move(leftChild);
+
+        leftChildPtr->right = std::move(nodeTmp);
+    }
+    leftChildPtr->parent = node->parent;
+    node->parent = leftChildPtr;
+}
+
+// protected utility
+
+template <typename T>
+TreeNode<T>* BinarySearchTree<T>::findNode(const T& key) const {  // O(h)
+    TreeNode<T>* it = root_.get();
+
+    while (it != nullptr && it->key != key) {
+        if (it->key > key)
+            it = it->left.get();
+        else
+            it = it->right.get();
+    }
+
+    return it;
+}
+
+template <typename T>
+const TreeTraversal<T>* BinarySearchTree<T>::getTraversal() const {
+    switch (traversal_) {
+        case INORDER:
+            return &inorder;
+        case PREORDER:
+            return &preorder;
+        case POSTORDER:
+            return &postorder;
+    }
 }
 
 // private Utility functions
@@ -356,20 +463,6 @@ std::unique_ptr<TreeNode<T>>& BinarySearchTree<T>::getUnique(TreeNode<T>* node) 
 }
 
 template <typename T>
-TreeNode<T>* BinarySearchTree<T>::findNode(const T& key) {  // O(h)
-    TreeNode<T>* it = root_.get();
-
-    while (it != nullptr && it->key != key) {
-        if (it->key > key)
-            it = it->left.get();
-        else
-            it = it->right.get();
-    }
-
-    return it;
-}
-
-template <typename T>
 void BinarySearchTree<T>::transplant(TreeNode<T>* toDelete, TreeNode<T>* replacement) {  // This does not work, and I still need to find out why
     std::unique_ptr<TreeNode<T>> replacementUnique = (replacement != nullptr) ? std::move(getUnique(replacement)) : nullptr;
     replacement = replacementUnique.get();
@@ -396,16 +489,4 @@ void BinarySearchTree<T>::transplant(TreeNode<T>* toDelete, std::unique_ptr<Tree
         toDelete->parent->left = std::move(replacement);
     else
         toDelete->parent->right = std::move(replacement);
-}
-
-template <typename T>
-const TreeTraversal<T>* BinarySearchTree<T>::enumToTrav(Traversal trav) const {
-    switch (trav) {
-        case INORDER:
-            return &inorder;
-        case PREORDER:
-            return &preorder;
-        case POSTORDER:
-            return &postorder;
-    }
 }
