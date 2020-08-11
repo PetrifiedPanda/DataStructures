@@ -72,13 +72,13 @@ SizeLinkedList<T>& SizeLinkedList<T>::operator=(const LinkedList<T>& list) {
 
 template <typename T>
 SizeLinkedList<T>& SizeLinkedList<T>::operator=(SizeLinkedList<T>&& list) {
-    LinkedList<T>::operator=(list);
+    LinkedList<T>::operator=(std::move(list));
     size_ = list.size_;
 }
 
 template <typename T>
 SizeLinkedList<T>& SizeLinkedList<T>::operator=(LinkedList<T>&& list) {
-    LinkedList<T>::operator=(list);
+    LinkedList<T>::operator=(std::move(list));
     size_ = LinkedList<T>::computeSize();
 }
 
