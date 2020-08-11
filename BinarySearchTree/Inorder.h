@@ -28,7 +28,6 @@ TreeNode<T>* Inorder<T>::getSuccessor(TreeNode<T>* currentNode, const BinarySear
     if (currentNode->right != nullptr) {
         return tree.subtreeMin(currentNode->right.get());
     } else {
-        int f = 0;
         TreeNode<T>* rightMost = tree.subtreeMax(tree.root_.get());
 
         if (rightMost == currentNode)
