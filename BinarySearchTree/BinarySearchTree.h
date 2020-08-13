@@ -287,13 +287,6 @@ TreeNode<T>* BinarySearchTree<T>::insertAndReturnNewNode(const T& key) {
     }
 }
 
-// protected Utility
-
-template <typename T>
-void BinarySearchTree<T>::setTraversal(Traversal trav) const {
-    traversal_ = trav;
-}
-
 // Rotations
 
 template <typename T>
