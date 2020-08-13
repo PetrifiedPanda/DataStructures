@@ -1,7 +1,5 @@
 #pragma once
 
-#include <functional>
-
 #include "Inorder.h"
 #include "Postorder.h"
 #include "Preorder.h"
@@ -46,23 +44,43 @@ class BinarySearchTree {
     void erase(const T& key);
     void erase(iterator it);
 
-    void forEach(const std::function<void(const T&)>& func, Traversal trav) const;
+    template <typename Function>
+    void forEach(const Function& func, Traversal trav) const {
+        Traversal prevTrav = this->traversal();
+        this->setTraversal(trav);
 
-    template <typename ReturnType>
-    ReturnType doWithTraversal(const std::function<ReturnType(const BinarySearchTree<T>&)>& func, Traversal trav) const {
-        Traversal oldTrav = traversal_;
-        traversal_ = trav;
+        for (const T& item : *this)
+            func(item);
+
+        this->setTraversal(prevTrav);
+    }
+
+    template <typename ReturnType, typename Function>
+    ReturnType doWithTraversal(const Function& func, Traversal trav) const {
+        Traversal prevTrav = this->traversal();
+        this->setTraversal(trav);
 
         ReturnType result = func(*this);
 
-        traversal_ = oldTrav;
+        this->setTraversal(prevTrav);
         return result;
     }
-    void doWithTraversal(const std::function<void(const BinarySearchTree<T>&)>& func, Traversal trav) const;
+
+    template <typename Function>
+    void doWithTraversal(const Function& func, Traversal trav) const {
+        Traversal prevTrav = this->traversal();
+        this->setTraversal(trav);
+
+        func(*this);
+
+        this->setTraversal(prevTrav);
+    }
 
     void clear();
 
     void setTraversal(Traversal trav);
+
+    Traversal traversal() const;
 
     size_t computeHeight() const;
     size_t computeSize() const;
@@ -80,6 +98,8 @@ class BinarySearchTree {
     iterator end() const;
 
    protected:
+    void setTraversal(Traversal trav) const;
+
     TreeNode<T>* insertAndReturnNewNode(const T& key);  // Change Name!
 
     void rotateLeft(TreeNode<T>* node);
@@ -161,27 +181,6 @@ void BinarySearchTree<T>::erase(iterator it) {
         erase(it.currentNode_);
 }
 
-template <typename T>
-void BinarySearchTree<T>::forEach(const std::function<void(const T&)>& func, Traversal trav) const {
-    Traversal prevTrav = traversal_;
-    traversal_ = trav;
-
-    for (const T& item : *this)
-        func(item);
-
-    traversal_ = prevTrav;
-}
-
-template <typename T>
-void BinarySearchTree<T>::doWithTraversal(const std::function<void(const BinarySearchTree<T>& tree)>& func, Traversal trav) const {
-    Traversal prevTrav = traversal_;
-    traversal_ = trav;
-
-    func(*this);
-
-    traversal_ = prevTrav;
-}
-
 // public Utility
 
 template <typename T>
@@ -192,6 +191,11 @@ void BinarySearchTree<T>::clear() {
 template <typename T>
 void BinarySearchTree<T>::setTraversal(Traversal trav) {
     traversal_ = trav;
+}
+
+template <typename T>
+typename BinarySearchTree<T>::Traversal BinarySearchTree<T>::traversal() const {
+    return traversal_;
 }
 
 template <typename T>
@@ -283,6 +287,13 @@ TreeNode<T>* BinarySearchTree<T>::insertAndReturnNewNode(const T& key) {
         itParent->right = std::make_unique<TreeNode<T>>(key, itParent);
         return itParent->right.get();
     }
+}
+
+// protected Utility
+
+template <typename T>
+void BinarySearchTree<T>::setTraversal(Traversal trav) const {
+    traversal_ = trav;
 }
 
 // Rotations
