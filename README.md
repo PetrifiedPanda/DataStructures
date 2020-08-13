@@ -19,6 +19,8 @@ This one is implemented using std::unique_ptr<> as the left and right child and 
 The iterator for this class iterates through the list following either the Inorder, Preorder or Postorder Traversal. 
 These are implemented as derived classes of the interface TreeTraversal, which handles most of the work of the iterators.
 The iterator also contains a reference to the original List, which I plan to change, because that makes the iterator non-reassignable.
+<br/>
+SplayTree is a Splay Tree implementation that inherits from BinarySearchTree
 
 ## BloomFilter
 There are 2 BloomFilter implementations, which both only work for std::strings:
