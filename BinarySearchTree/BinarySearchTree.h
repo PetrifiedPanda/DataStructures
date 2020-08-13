@@ -46,34 +46,34 @@ class BinarySearchTree {
 
     template <typename Function>
     void forEach(const Function& func, Traversal trav) const {
-        Traversal prevTrav = this->traversal();
-        this->setTraversal(trav);
+        Traversal prevTrav = traversal_;
+        traversal_ = trav;
 
         for (const T& item : *this)
             func(item);
 
-        this->setTraversal(prevTrav);
+        traversal_ = prevTrav;
     }
 
     template <typename ReturnType, typename Function>
     ReturnType doWithTraversal(const Function& func, Traversal trav) const {
-        Traversal prevTrav = this->traversal();
-        this->setTraversal(trav);
+        Traversal prevTrav = traversal_;
+        traversal_ = trav;
 
         ReturnType result = func(*this);
 
-        this->setTraversal(prevTrav);
+        traversal_ = prevTrav;
         return result;
     }
 
     template <typename Function>
     void doWithTraversal(const Function& func, Traversal trav) const {
-        Traversal prevTrav = this->traversal();
-        this->setTraversal(trav);
+        Traversal prevTrav = traversal_;
+        traversal_ = trav;
 
         func(*this);
 
-        this->setTraversal(prevTrav);
+        traversal_ = prevTrav;
     }
 
     void clear();
@@ -98,8 +98,6 @@ class BinarySearchTree {
     iterator end() const;
 
    protected:
-    void setTraversal(Traversal trav) const;
-
     TreeNode<T>* insertAndReturnNewNode(const T& key);  // Change Name!
 
     void rotateLeft(TreeNode<T>* node);
