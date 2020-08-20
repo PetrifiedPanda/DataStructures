@@ -16,9 +16,7 @@ SizeLinkedList is a small attempt at making a LinkedList that saves its size in 
 
 ## BinarySearchTree
 This one is implemented using std::unique_ptr<> as the left and right child and a raw pointer as the parent node.
-The iterator for this class iterates through the list following either the Inorder, Preorder or Postorder Traversal. 
-These are implemented as derived classes of the interface TreeTraversal, which handles most of the work of the iterators.
-The iterator also contains a reference to the original List, which I plan to change, because that makes the iterator non-reassignable.
+With the iterator you can traverse the tree like you would with Node Pointers.
 <br/>
 SplayTree is a Splay Tree implementation that inherits from BinarySearchTree
 
