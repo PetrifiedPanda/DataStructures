@@ -4,9 +4,8 @@ template <typename T>
 class SplayTree : public BinarySearchTree<T> {
    public:
     using iterator = typename BinarySearchTree<T>::iterator;
-    using Traversal = typename BinarySearchTree<T>::Traversal;  // Maybe make Traversal an enum class declared outside BinarySearchTree
 
-    SplayTree(Traversal trav = BinarySearchTree<T>::INORDER) : BinarySearchTree<T>(trav) {}
+    SplayTree() : BinarySearchTree<T>() {}
     SplayTree(const SplayTree<T>& tree) : BinarySearchTree<T>(tree) {}
     SplayTree(const BinarySearchTree<T>& tree) : BinarySearchTree<T>(tree) {}
     SplayTree(SplayTree<T>&& tree) : BinarySearchTree<T>(std::move(tree)) {}
@@ -17,10 +16,18 @@ class SplayTree : public BinarySearchTree<T> {
 
     void insert(const T& key);
 
+    void erase(const T& key);
+    void erase(iterator& it);
+    void erase(iterator&& it);
+
     iterator find(const T& key);
 
    private:
+    void erase(TreeNode<T>* node);
+
     void splay(TreeNode<T>* node);
+
+    void splayUpTo(TreeNode<T>* node, TreeNode<T>* newParent);
 
     void zigZig(TreeNode<T>* node);
     void zigZag(TreeNode<T>* node);
@@ -47,21 +54,67 @@ void SplayTree<T>::insert(const T& key) {
     splay(this->insertAndReturnNewNode(key));
 }
 
+// Delete operation
+
+template <typename T>
+void SplayTree<T>::erase(const T& key) {
+    TreeNode<T>* keyNode = BinarySearchTree<T>::findNode(key);
+    if (keyNode != nullptr)
+        erase(keyNode);
+}
+
+template <typename T>
+void SplayTree<T>::erase(iterator& it) {
+    TreeNode<T>* itNode = BinarySearchTree<T>::getPtr(it);
+    if (it.currentNode_ != nullptr) {
+        erase(itNode);
+        invalidateIterator(it);
+    }
+}
+
+template <typename T>
+void SplayTree<T>::erase(iterator&& it) {
+    TreeNode<T>* itNode = BinarySearchTree<T>::getPtr(it);
+    if (itNode != nullptr) {
+        erase(itNode);
+        invalidateIterator(it);
+    }
+}
+
 // Search operation
 
 template <typename T>
 typename SplayTree<T>::iterator SplayTree<T>::find(const T& key) {
-    TreeNode<T>* keyNode = findNode(key);
+    TreeNode<T>* keyNode = BinarySearchTree<T>::findNode(key);
     if (keyNode != nullptr)
         splay(keyNode);
-    return iterator(keyNode, *this, BinarySearchTree<T>::getTraversal());
+    return iterator(keyNode);
 }
 
 // Splay operations and helpers
 
 template <typename T>
+void SplayTree<T>::erase(TreeNode<T>* node) {
+    splay(node);
+
+    if (node->left == nullptr) {
+        // Replace with root of right subtree
+    } else if (node->right == nullptr) {
+        // Replace with root of left subtree
+    } else {
+        splayUpTo(subtreeMin(node->left.get()), node);  // node pointer should not have been invalidated
+        // Replace this one with node
+    }
+}
+
+template <typename T>
 void SplayTree<T>::splay(TreeNode<T>* node) {
-    while (node->parent != nullptr) {
+    splayUpTo(node, nullptr);
+}
+
+template <typename T>
+void SplayTree<T>::splayUpTo(TreeNode<T>* node, TreeNode<T>* newParent) {
+    while (node->parent != newParent) {
         if (node->parent->parent == nullptr)
             zig(node);
         else if ((node->parent->parent->left != nullptr && node == node->parent->parent->left->left.get()) ||
