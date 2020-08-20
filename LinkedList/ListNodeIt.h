@@ -18,9 +18,6 @@ class ListNodeIt {
     ListNodeIt<T>& operator++();
     ListNodeIt<T>& operator--();
 
-    ListNodeIt<T> operator+(int offset);
-    ListNodeIt<T> operator-(int offset);
-
     T& operator*();
     const T& operator*() const;
 
@@ -43,28 +40,6 @@ ListNodeIt<T>& ListNodeIt<T>::operator--() {
     else
         currentNode_ = currentNode_->prev;
     return *this;
-}
-
-// Addition / Subtraction operators
-
-template <typename T>
-ListNodeIt<T> ListNodeIt<T>::operator+(int offset) {  // These are sadly not O(1)
-    ListNodeIt<T> result(currentNode_, list_);
-
-    for (int i = 0; i < offset; ++i)
-        ++result;
-
-    return result;
-}
-
-template <typename T>
-ListNodeIt<T> ListNodeIt<T>::operator-(int offset) {  // These are sadly not O(1)
-    ListNodeIt<T> result(currentNode_, list_);
-
-    for (int i = 0; i < offset; ++i)
-        --result;
-
-    return result;
 }
 
 // Dereference operators
