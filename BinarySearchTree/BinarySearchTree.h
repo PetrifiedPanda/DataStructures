@@ -1,8 +1,7 @@
 #pragma once
 
-#include "Inorder.h"
-#include "Postorder.h"
-#include "Preorder.h"
+#include <vector>
+
 #include "TreeNode.h"
 #include "TreeNodeIt.h"
 
@@ -11,28 +10,9 @@ template <typename T>
 class BinarySearchTree {
     std::unique_ptr<TreeNode<T>> root_;
 
-    friend class Inorder<T>;
-    friend class Preorder<T>;
-    friend class Postorder<T>;
-
-   public:
-    enum Traversal {
-        INORDER,
-        PREORDER,
-        POSTORDER
-    };
-
-   private:
-    // The setTraversal() function should stay non-const while every const function that modifies this should reset it after usage
-    mutable Traversal traversal_;
-
-    Inorder<T> inorder;
-    Preorder<T> preorder;
-    Postorder<T> postorder;
-
    public:
     using iterator = TreeNodeIt<T>;
-    BinarySearchTree(Traversal trav = INORDER) : root_(nullptr), traversal_(trav) {}
+    BinarySearchTree() : root_(nullptr) {}
     BinarySearchTree(const BinarySearchTree<T>& tree);
     BinarySearchTree(BinarySearchTree<T>&& tree) noexcept;
 
@@ -42,45 +22,17 @@ class BinarySearchTree {
     void insert(const T& key);
 
     void erase(const T& key);
-    void erase(iterator it);
-
-    template <typename Function>
-    void forEach(const Function& func, Traversal trav) const {
-        Traversal prevTrav = traversal_;
-        traversal_ = trav;
-
-        for (const T& item : *this)
-            func(item);
-
-        traversal_ = prevTrav;
-    }
-
-    template <typename ReturnType, typename Function>
-    ReturnType doWithTraversal(const Function& func, Traversal trav) const {
-        Traversal prevTrav = traversal_;
-        traversal_ = trav;
-
-        ReturnType result = func(*this);
-
-        traversal_ = prevTrav;
-        return result;
-    }
-
-    template <typename Function>
-    void doWithTraversal(const Function& func, Traversal trav) const {
-        Traversal prevTrav = traversal_;
-        traversal_ = trav;
-
-        func(*this);
-
-        traversal_ = prevTrav;
-    }
+    // We need to differentiate between an lvalue and an rvalue here, because we have to invalidate the pointer of the iterator
+    void erase(iterator& it);
+    void erase(iterator&& it);
 
     void clear();
 
-    void setTraversal(Traversal trav);
+    std::vector<T> inorder() const;
+    std::vector<T> preorder() const;
+    std::vector<T> postorder() const;
 
-    Traversal traversal() const;
+    bool isEmpty() const;
 
     size_t computeHeight() const;
     size_t computeSize() const;
@@ -94,10 +46,12 @@ class BinarySearchTree {
     T extractMax();
     T extractMin();
 
-    iterator begin() const;
-    iterator end() const;
+    iterator root() const;
 
    protected:
+    TreeNode<T>* getPtr(iterator it);  // Think about a better way that does not expose the whole tree to subclasses
+    void invalidateIterator(iterator& it);
+
     TreeNode<T>* insertAndReturnNewNode(const T& key);  // Change Name!
 
     void rotateLeft(TreeNode<T>* node);
@@ -105,13 +59,15 @@ class BinarySearchTree {
 
     TreeNode<T>* findNode(const T& key) const;
 
-    const TreeTraversal<T>* getTraversal() const;
-
    private:
     void erase(TreeNode<T>* toDelete);
 
     size_t subtreeHeight(TreeNode<T>* subTreeRoot) const;
     size_t subtreeSize(TreeNode<T>* subTreeRoot) const;
+
+    void subtreeInorder(TreeNode<T>* subTreeRoot, std::vector<T>& trav) const;
+    void subtreePreorder(TreeNode<T>* subTreeRoot, std::vector<T>& trav) const;
+    void subtreePostorder(TreeNode<T>* subTreeRoot, std::vector<T>& trav) const;
 
     TreeNode<T>* subtreeMin(TreeNode<T>* subTreeRoot) const;
     TreeNode<T>* subtreeMax(TreeNode<T>* subTreeRoot) const;
@@ -126,11 +82,10 @@ class BinarySearchTree {
 
 template <typename T>
 BinarySearchTree<T>::BinarySearchTree(const BinarySearchTree<T>& tree) : BinarySearchTree<T>() {
-    doWithTraversal([&](const BinarySearchTree<T>& tree) {
-        for (const T& key : tree)
-            insert(key);
-    },
-                    PREORDER);
+    std::vector<T> preorderVec = tree.preorder();
+
+    for (const T& item : preorderVec)
+        insert(item);
 }
 
 template <typename T>
@@ -144,11 +99,10 @@ template <typename T>
 BinarySearchTree<T>& BinarySearchTree<T>::operator=(const BinarySearchTree<T>& tree) {
     clear();
 
-    doWithTraversal([&](const BinarySearchTree<T>& tree) {
-        for (const T& key : tree)
-            insert(key);
-    },
-                    PREORDER);
+    std::vector<T> preorderVec = tree.preorder();
+
+    for (const T& item : preorderVec)
+        insert(item);
 }
 
 template <typename T>
@@ -174,9 +128,19 @@ void BinarySearchTree<T>::erase(const T& key) {  // O(h)
 }
 
 template <typename T>
-void BinarySearchTree<T>::erase(iterator it) {
-    if (it != end())
+void BinarySearchTree<T>::erase(iterator& it) {
+    if (it.currentNode_ != nullptr) {
         erase(it.currentNode_);
+        invalidateIterator(it);
+    }
+}
+
+template <typename T>
+void BinarySearchTree<T>::erase(iterator&& it) {
+    if (it.currentNode_ != nullptr) {
+        erase(it.currentNode_);
+        invalidateIterator(it);
+    }
 }
 
 // public Utility
@@ -186,14 +150,35 @@ void BinarySearchTree<T>::clear() {
     root_ = nullptr;
 }
 
+// Traversals
+
 template <typename T>
-void BinarySearchTree<T>::setTraversal(Traversal trav) {
-    traversal_ = trav;
+std::vector<T> BinarySearchTree<T>::inorder() const {
+    std::vector<T> result;
+    result.reserve(computeSize());
+    subtreeInorder(root_.get(), result);
+    return result;
 }
 
 template <typename T>
-typename BinarySearchTree<T>::Traversal BinarySearchTree<T>::traversal() const {
-    return traversal_;
+std::vector<T> BinarySearchTree<T>::preorder() const {
+    std::vector<T> result;
+    result.reserve(computeSize());
+    subtreePreorder(root_.get(), result);
+    return result;
+}
+
+template <typename T>
+std::vector<T> BinarySearchTree<T>::postorder() const {
+    std::vector<T> result;
+    result.reserve(computeSize());
+    subtreePostorder(root_.get(), result);
+    return result;
+}
+
+template <typename T>
+bool BinarySearchTree<T>::isEmpty() const {
+    return root_ == nullptr;
 }
 
 template <typename T>
@@ -208,19 +193,19 @@ size_t BinarySearchTree<T>::computeSize() const {
 
 template <typename T>
 typename BinarySearchTree<T>::iterator BinarySearchTree<T>::find(const T& key) const {
-    return iterator(findNode(key), *this, getTraversal());
+    return iterator(findNode(key));
 }
 
 // Min / Max functions
 
 template <typename T>
 typename BinarySearchTree<T>::iterator BinarySearchTree<T>::min() const {  // O(h)
-    return iterator(subtreeMin(root_.get()), *this, getTraversal());
+    return iterator(subtreeMin(root_.get()));
 }
 
 template <typename T>
 typename BinarySearchTree<T>::iterator BinarySearchTree<T>::max() const {  // O(h)
-    return iterator(subtreeMax(root_.get()), *this, getTraversal());
+    return iterator(subtreeMax(root_.get()));
 }
 
 template <typename T>
@@ -236,7 +221,7 @@ T BinarySearchTree<T>::maxKey() const {
 template <typename T>
 T BinarySearchTree<T>::extractMin() {
     iterator minIt = min();
-    T key = *minIt;
+    T key = minIt.key();
     erase(minIt);
     return key;
 }
@@ -244,21 +229,24 @@ T BinarySearchTree<T>::extractMin() {
 template <typename T>
 T BinarySearchTree<T>::extractMax() {
     iterator maxIt = max();
-    T key = *maxIt;
+    T key = maxIt.key();
     erase(maxIt);
     return key;
 }
 
-// Begin / End functions
-
 template <typename T>
-typename BinarySearchTree<T>::iterator BinarySearchTree<T>::begin() const {
-    return iterator(*this, getTraversal());
+typename BinarySearchTree<T>::iterator BinarySearchTree<T>::root() const {
+    return iterator(root_.get());
 }
 
 template <typename T>
-typename BinarySearchTree<T>::iterator BinarySearchTree<T>::end() const {
-    return iterator(nullptr, *this, getTraversal());
+TreeNode<T>* BinarySearchTree<T>::getPtr(iterator it) {
+    return it.currentNode_;
+}
+
+template <typename T>
+void BinarySearchTree<T>::invalidateIterator(iterator& it) {
+    it.currentNode_ = nullptr;
 }
 
 template <typename T>
@@ -367,18 +355,6 @@ TreeNode<T>* BinarySearchTree<T>::findNode(const T& key) const {  // O(h)
     return it;
 }
 
-template <typename T>
-const TreeTraversal<T>* BinarySearchTree<T>::getTraversal() const {
-    switch (traversal_) {
-        case INORDER:
-            return &inorder;
-        case PREORDER:
-            return &preorder;
-        case POSTORDER:
-            return &postorder;
-    }
-}
-
 // private Utility functions
 
 template <typename T>
@@ -432,6 +408,33 @@ size_t BinarySearchTree<T>::subtreeSize(TreeNode<T>* subtreeRoot) const {
         return 0;
 
     return subtreeSize(subtreeRoot->right.get()) + subtreeSize(subtreeRoot->left.get()) + 1;
+}
+
+template <typename T>
+void BinarySearchTree<T>::subtreeInorder(TreeNode<T>* subTreeRoot, std::vector<T>& trav) const {
+    if (subTreeRoot != nullptr) {
+        subtreeInorder(subTreeRoot->left.get(), trav);
+        trav.push_back(subTreeRoot->key);
+        subtreeInorder(subTreeRoot->right.get(), trav);
+    }
+}
+
+template <typename T>
+void BinarySearchTree<T>::subtreePreorder(TreeNode<T>* subTreeRoot, std::vector<T>& trav) const {
+    if (subTreeRoot != nullptr) {
+        trav.push_back(subTreeRoot->key);
+        subtreePreorder(subTreeRoot->left.get(), trav);
+        subtreePreorder(subTreeRoot->right.get(), trav);
+    }
+}
+
+template <typename T>
+void BinarySearchTree<T>::subtreePostorder(TreeNode<T>* subTreeRoot, std::vector<T>& trav) const {
+    if (subTreeRoot != nullptr) {
+        subtreePostorder(subTreeRoot->left.get(), trav);
+        subtreePostorder(subTreeRoot->right.get(), trav);
+        trav.push_back(subTreeRoot->key);
+    }
 }
 
 template <typename T>
