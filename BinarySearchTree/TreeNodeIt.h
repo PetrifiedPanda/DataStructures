@@ -1,73 +1,93 @@
 #pragma once
 
 #include "TreeNode.h"
-#include "TreeTraversal.h"
 
 template <typename T>
 class BinarySearchTree;
 
+// These need more checks for nullptr
+
 template <typename T>
 class TreeNodeIt {
     TreeNode<T>* currentNode_;
-    const BinarySearchTree<T>& tree_;
-    const TreeTraversal<T>* traversal_;
 
     friend class BinarySearchTree<T>;
 
    public:
-    TreeNodeIt(TreeNode<T>* node, const BinarySearchTree<T>& tree, const TreeTraversal<T>* traversal) : currentNode_(node), tree_(tree), traversal_(traversal) {}
-    TreeNodeIt(const BinarySearchTree<T>& tree, const TreeTraversal<T>* traversal) : tree_(tree), traversal_(traversal) {
-        currentNode_ = traversal_->startNode(tree_);
-    }
+    TreeNodeIt() : currentNode_(nullptr) {}
+    explicit TreeNodeIt(TreeNode<T>* node) : currentNode_(node) {}
 
-    TreeNodeIt<T>& operator++();
+    bool isValid() const;
 
-    TreeNodeIt<T> operator+(int offset);
+    bool hasLeftChild() const;
+    bool hasRightChild() const;
+    bool hasParent() const;
 
-    const T& operator*() const;
+    const T& key() const;
 
-    bool operator==(const TreeNodeIt<T>& other) const;
-    bool operator!=(const TreeNodeIt<T>& other) const;
+    TreeNodeIt<T>& left();
+    TreeNodeIt<T> getLeft() const;
+
+    TreeNodeIt<T>& right();
+    TreeNodeIt<T> getRight() const;
+
+    TreeNodeIt<T>& parent();
+    TreeNodeIt<T> getParent() const;
 };
 
-// Increment / Decrement operators
-
 template <typename T>
-TreeNodeIt<T>& TreeNodeIt<T>::operator++() {  // O(h)
-    if (currentNode_ != nullptr)
-        currentNode_ = traversal_->getSuccessor(currentNode_, tree_);
-    return *this;
+bool TreeNodeIt<T>::isValid() const {
+    return currentNode_ != nullptr;
 }
 
-// Addition / Subtraction operators
-
 template <typename T>
-TreeNodeIt<T> TreeNodeIt<T>::operator+(int offset) {  // O(h * offset)
-    TreeNodeIt<T> result(currentNode_, tree_, traversal_);
-
-    for (int i = 0; i < offset; ++i)
-        ++result;
-
-    return result;
+bool TreeNodeIt<T>::hasLeftChild() const {
+    return currentNode_->left != nullptr;
 }
 
-// Dereference operators
+template <typename T>
+bool TreeNodeIt<T>::hasRightChild() const {
+    return currentNode_->right != nullptr;
+}
 
 template <typename T>
-const T& TreeNodeIt<T>::operator*() const {
+bool TreeNodeIt<T>::hasParent() const {
+    return currentNode_->parent != nullptr;
+}
+
+template <typename T>
+const T& TreeNodeIt<T>::key() const {
     return currentNode_->key;
 }
 
-// Comparision operators
-
 template <typename T>
-bool TreeNodeIt<T>::operator==(const TreeNodeIt<T>& other) const {
-    return currentNode_ == other.currentNode_;
+TreeNodeIt<T>& TreeNodeIt<T>::left() {
+    currentNode_ = currentNode_->left.get();
 }
 
 template <typename T>
-bool TreeNodeIt<T>::operator!=(const TreeNodeIt<T>& other) const {
-    return !(*this == other);
+TreeNodeIt<T> TreeNodeIt<T>::getLeft() const {
+    return TreeNodeIt(currentNode_->left.get());
+}
+
+template <typename T>
+TreeNodeIt<T>& TreeNodeIt<T>::right() {
+    currentNode_ = currentNode_->right.get();
+}
+
+template <typename T>
+TreeNodeIt<T> TreeNodeIt<T>::getRight() const {
+    return TreeNodeIt(currentNode_->right.get());
+}
+
+template <typename T>
+TreeNodeIt<T>& TreeNodeIt<T>::parent() {
+    currentNode_ = currentNode_->parent;
+}
+
+template <typename T>
+TreeNodeIt<T> TreeNodeIt<T>::getParent() const {
+    return TreeNodeIt(currentNode_->parent);
 }
 
 #include "BinarySearchTree.h"
