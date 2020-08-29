@@ -49,6 +49,8 @@ class BinarySearchTree {
     iterator root() const;
 
    protected:
+    std::unique_ptr<TreeNode<T>>& getUnique(TreeNode<T>* node);
+
     TreeNode<T>* getPtr(iterator it);  // Think about a better way that does not expose the whole tree to subclasses
     void invalidateIterator(iterator& it);
 
@@ -59,6 +61,12 @@ class BinarySearchTree {
 
     TreeNode<T>* findNode(const T& key) const;
 
+    TreeNode<T>* subtreeMin(TreeNode<T>* subTreeRoot) const;
+    TreeNode<T>* subtreeMax(TreeNode<T>* subTreeRoot) const;
+
+    void transplant(TreeNode<T>* toDelete, TreeNode<T>* replacement);
+    void transplant(TreeNode<T>* toDelete, std::unique_ptr<TreeNode<T>>& replacement);
+
    private:
     void erase(TreeNode<T>* toDelete);
 
@@ -68,14 +76,6 @@ class BinarySearchTree {
     void subtreeInorder(TreeNode<T>* subTreeRoot, std::vector<T>& trav) const;
     void subtreePreorder(TreeNode<T>* subTreeRoot, std::vector<T>& trav) const;
     void subtreePostorder(TreeNode<T>* subTreeRoot, std::vector<T>& trav) const;
-
-    TreeNode<T>* subtreeMin(TreeNode<T>* subTreeRoot) const;
-    TreeNode<T>* subtreeMax(TreeNode<T>* subTreeRoot) const;
-
-    std::unique_ptr<TreeNode<T>>& getUnique(TreeNode<T>* node);
-
-    void transplant(TreeNode<T>* toDelete, TreeNode<T>* replacement);
-    void transplant(TreeNode<T>* toDelete, std::unique_ptr<TreeNode<T>>& replacement);
 };
 
 // Constructors
@@ -239,6 +239,18 @@ typename BinarySearchTree<T>::iterator BinarySearchTree<T>::root() const {
     return iterator(root_.get());
 }
 
+// Protected utility functions
+
+template <typename T>
+std::unique_ptr<TreeNode<T>>& BinarySearchTree<T>::getUnique(TreeNode<T>* node) {  // Can't handle nullptr
+    if (node->parent == nullptr)
+        return root_;
+    else if (node == node->parent->left.get())
+        return node->parent->left;
+    else
+        return node->parent->right;
+}
+
 template <typename T>
 TreeNode<T>* BinarySearchTree<T>::getPtr(iterator it) {
     return it.currentNode_;
@@ -286,24 +298,19 @@ void BinarySearchTree<T>::rotateLeft(TreeNode<T>* node) {
         rightChild->left->parent = node;
     node->right = std::move(rightChild->left);
 
-    if (node->parent == nullptr) {
-        std::unique_ptr<TreeNode<T>> nodeTmp = std::move(getUnique(node));
+    bool isLeftChild = false;
+    if (node->parent != nullptr && node == node->parent->left.get())
+        isLeftChild = true;
+
+    std::unique_ptr<TreeNode<T>> nodeTmp = std::move(getUnique(node));
+    if (node->parent == nullptr)
         root_ = std::move(rightChild);
-        root_->left = std::move(nodeTmp);
-    } else {
-        TreeNode<T>* nodeParent = node->parent;
-        bool isLeftChild = false;
-        if (node == nodeParent->left.get())
-            isLeftChild = true;
+    else if (isLeftChild)
+        node->parent->left = std::move(rightChild);
+    else
+        node->parent->right = std::move(rightChild);
 
-        std::unique_ptr<TreeNode<T>> nodeTmp = std::move(getUnique(node));
-        if (isLeftChild)
-            nodeParent->left = std::move(rightChild);
-        else
-            nodeParent->right = std::move(rightChild);
-
-        rightChildPtr->left = std::move(nodeTmp);
-    }
+    rightChildPtr->left = std::move(nodeTmp);
     rightChildPtr->parent = node->parent;
     node->parent = rightChildPtr;
 }
@@ -317,29 +324,22 @@ void BinarySearchTree<T>::rotateRight(TreeNode<T>* node) {
         leftChild->right->parent = node;
     node->left = std::move(leftChild->right);
 
-    if (node->parent == nullptr) {
-        std::unique_ptr<TreeNode<T>> nodeTmp = std::move(getUnique(node));
+    bool isLeftChild = false;
+    if (node->parent != nullptr && node == node->parent->left.get())
+        isLeftChild = true;
+
+    std::unique_ptr<TreeNode<T>> nodeTmp = std::move(getUnique(node));
+    if (node->parent == nullptr)
         root_ = std::move(leftChild);
-        root_->right = std::move(nodeTmp);
-    } else {
-        TreeNode<T>* nodeParent = node->parent;
-        bool isLeftChild = false;
-        if (node == nodeParent->left.get())
-            isLeftChild = true;
+    else if (isLeftChild)
+        node->parent->left = std::move(leftChild);
+    else
+        node->parent->right = std::move(leftChild);
 
-        std::unique_ptr<TreeNode<T>> nodeTmp = std::move(getUnique(node));
-        if (isLeftChild)
-            nodeParent->left = std::move(leftChild);
-        else
-            nodeParent->right = std::move(leftChild);
-
-        leftChildPtr->right = std::move(nodeTmp);
-    }
+    leftChildPtr->right = std::move(nodeTmp);
     leftChildPtr->parent = node->parent;
     node->parent = leftChildPtr;
 }
-
-// protected utility
 
 template <typename T>
 TreeNode<T>* BinarySearchTree<T>::findNode(const T& key) const {  // O(h)
@@ -351,6 +351,55 @@ TreeNode<T>* BinarySearchTree<T>::findNode(const T& key) const {  // O(h)
         else
             it = it->right.get();
     }
+
+    return it;
+}
+
+template <typename T>
+void BinarySearchTree<T>::transplant(TreeNode<T>* toDelete, TreeNode<T>* replacement) {  // This does not work, and I still need to find out why
+    std::unique_ptr<TreeNode<T>> replacementUnique = (replacement != nullptr) ? std::move(getUnique(replacement)) : nullptr;
+    replacement = replacementUnique.get();
+
+    if (replacement != nullptr)
+        replacement->parent = toDelete->parent;
+
+    if (toDelete->parent == nullptr)
+        root_ = std::move(replacementUnique);
+    else if (toDelete == toDelete->parent->left.get())
+        toDelete->parent->left = std::move(replacementUnique);
+    else
+        toDelete->parent->right = std::move(replacementUnique);
+}
+
+template <typename T>
+void BinarySearchTree<T>::transplant(TreeNode<T>* toDelete, std::unique_ptr<TreeNode<T>>& replacement) {  // O(1)
+    if (replacement != nullptr)
+        replacement->parent = toDelete->parent;
+
+    if (toDelete->parent == nullptr)
+        root_ = std::move(replacement);
+    else if (toDelete == toDelete->parent->left.get())
+        toDelete->parent->left = std::move(replacement);
+    else
+        toDelete->parent->right = std::move(replacement);
+}
+
+template <typename T>
+TreeNode<T>* BinarySearchTree<T>::subtreeMin(TreeNode<T>* subTreeRoot) const {  // O(h)
+    TreeNode<T>* it = subTreeRoot;
+
+    while (it != nullptr && it->left != nullptr)
+        it = it->left.get();
+
+    return it;
+}
+
+template <typename T>
+TreeNode<T>* BinarySearchTree<T>::subtreeMax(TreeNode<T>* subTreeRoot) const {  // O(h)
+    TreeNode<T>* it = subTreeRoot;
+
+    while (it != nullptr && it->right != nullptr)
+        it = it->right.get();
 
     return it;
 }
@@ -435,63 +484,4 @@ void BinarySearchTree<T>::subtreePostorder(TreeNode<T>* subTreeRoot, std::vector
         subtreePostorder(subTreeRoot->right.get(), trav);
         trav.push_back(subTreeRoot->key);
     }
-}
-
-template <typename T>
-TreeNode<T>* BinarySearchTree<T>::subtreeMin(TreeNode<T>* subTreeRoot) const {  // O(h)
-    TreeNode<T>* it = subTreeRoot;
-
-    while (it != nullptr && it->left != nullptr)
-        it = it->left.get();
-
-    return it;
-}
-
-template <typename T>
-TreeNode<T>* BinarySearchTree<T>::subtreeMax(TreeNode<T>* subTreeRoot) const {  // O(h)
-    TreeNode<T>* it = subTreeRoot;
-
-    while (it != nullptr && it->right != nullptr)
-        it = it->right.get();
-
-    return it;
-}
-
-template <typename T>
-std::unique_ptr<TreeNode<T>>& BinarySearchTree<T>::getUnique(TreeNode<T>* node) {  // Can't handle nullptr
-    if (node->parent == nullptr)
-        return root_;
-    else if (node == node->parent->left.get())
-        return node->parent->left;
-    else
-        return node->parent->right;
-}
-
-template <typename T>
-void BinarySearchTree<T>::transplant(TreeNode<T>* toDelete, TreeNode<T>* replacement) {  // This does not work, and I still need to find out why
-    std::unique_ptr<TreeNode<T>> replacementUnique = (replacement != nullptr) ? std::move(getUnique(replacement)) : nullptr;
-    replacement = replacementUnique.get();
-
-    if (replacement != nullptr)
-        replacement->parent = toDelete->parent;
-
-    if (toDelete->parent == nullptr)
-        root_ = std::move(replacementUnique);
-    else if (toDelete == toDelete->parent->left.get())
-        toDelete->parent->left = std::move(replacementUnique);
-    else
-        toDelete->parent->right = std::move(replacementUnique);
-}
-
-template <typename T>
-void BinarySearchTree<T>::transplant(TreeNode<T>* toDelete, std::unique_ptr<TreeNode<T>>& replacement) {  // O(1)
-    if (replacement != nullptr)
-        replacement->parent = toDelete->parent;
-
-    if (toDelete->parent == nullptr)
-        root_ = std::move(replacement);
-    else if (toDelete == toDelete->parent->left.get())
-        toDelete->parent->left = std::move(replacement);
-    else
-        toDelete->parent->right = std::move(replacement);
 }
