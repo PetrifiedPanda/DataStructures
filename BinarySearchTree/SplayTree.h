@@ -58,26 +58,26 @@ void SplayTree<T>::insert(const T& key) {
 
 template <typename T>
 void SplayTree<T>::erase(const T& key) {
-    TreeNode<T>* keyNode = BinarySearchTree<T>::findNode(key);
+    TreeNode<T>* keyNode = this->findNode(key);
     if (keyNode != nullptr)
         erase(keyNode);
 }
 
 template <typename T>
 void SplayTree<T>::erase(iterator& it) {
-    TreeNode<T>* itNode = BinarySearchTree<T>::getPtr(it);
-    if (it.currentNode_ != nullptr) {
+    TreeNode<T>* itNode = this->getPtr(it);
+    if (itNode != nullptr) {
         erase(itNode);
-        invalidateIterator(it);
+        this->invalidateIterator(it);
     }
 }
 
 template <typename T>
 void SplayTree<T>::erase(iterator&& it) {
-    TreeNode<T>* itNode = BinarySearchTree<T>::getPtr(it);
+    TreeNode<T>* itNode = this->getPtr(it);
     if (itNode != nullptr) {
         erase(itNode);
-        invalidateIterator(it);
+        this->invalidateIterator(it);
     }
 }
 
@@ -85,27 +85,30 @@ void SplayTree<T>::erase(iterator&& it) {
 
 template <typename T>
 typename SplayTree<T>::iterator SplayTree<T>::find(const T& key) {
-    TreeNode<T>* keyNode = BinarySearchTree<T>::findNode(key);
+    TreeNode<T>* keyNode = this->findNode(key);
     if (keyNode != nullptr)
         splay(keyNode);
     return iterator(keyNode);
 }
-
-// Splay operations and helpers
 
 template <typename T>
 void SplayTree<T>::erase(TreeNode<T>* node) {
     splay(node);
 
     if (node->left == nullptr) {
-        // Replace with root of right subtree
+        this->transplant(node, node->right);
     } else if (node->right == nullptr) {
-        // Replace with root of left subtree
+        this->transplant(node, node->left);
     } else {
-        splayUpTo(subtreeMin(node->left.get()), node);  // node pointer should not have been invalidated
-        // Replace this one with node
+        TreeNode<T>* leftMax = this->subtreeMax(node->left.get());
+        splayUpTo(leftMax, node);
+        leftMax->right = std::move(node->right);
+        leftMax->right->parent = leftMax;
+        this->transplant(node, this->getUnique(leftMax));
     }
 }
+
+// Splay operations and helpers
 
 template <typename T>
 void SplayTree<T>::splay(TreeNode<T>* node) {
@@ -115,7 +118,7 @@ void SplayTree<T>::splay(TreeNode<T>* node) {
 template <typename T>
 void SplayTree<T>::splayUpTo(TreeNode<T>* node, TreeNode<T>* newParent) {
     while (node->parent != newParent) {
-        if (node->parent->parent == nullptr)
+        if (node->parent->parent == newParent)
             zig(node);
         else if ((node->parent->parent->left != nullptr && node == node->parent->parent->left->left.get()) ||
                  (node->parent->parent->right != nullptr && node == node->parent->parent->right->right.get()))
