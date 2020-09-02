@@ -66,27 +66,31 @@ LinkedList<T>::LinkedList(std::initializer_list<T> lst) : LinkedList() {
 
 template <typename T>
 LinkedList<T>& LinkedList<T>::operator=(const LinkedList<T>& lst) {
-    this->clear();
+    if (this != &lst) {
+        clear();
 
-    for (const T& item : lst)
-        append(item);
+        for (const T& item : lst)
+            append(item);
+    }
 
     return *this;
 }
 
 template <typename T>
 LinkedList<T>& LinkedList<T>::operator=(LinkedList<T>&& lst) {
-    head_ = std::move(lst.head_);
-    tail_ = lst.tail_;
-    lst.head_ = nullptr;
-    lst.tail_ = nullptr;
+    if (this != &lst) {
+        head_ = std::move(lst.head_);
+        tail_ = lst.tail_;
+        lst.head_ = nullptr;
+        lst.tail_ = nullptr;
+    }
 
     return *this;
 }
 
 template <typename T>
 LinkedList<T>& LinkedList<T>::operator=(std::initializer_list<T> lst) {
-    this->clear();
+    clear();
 
     for (const T& item : lst)
         append(item);
