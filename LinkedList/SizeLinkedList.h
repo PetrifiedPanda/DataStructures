@@ -74,6 +74,8 @@ SizeLinkedList<T>& SizeLinkedList<T>::operator=(LinkedList<T>&& list) {
 
 template <typename T>
 SizeLinkedList<T>& SizeLinkedList<T>::operator=(std::initializer_list<T> list) {
+    this->clear();
+
     for (const auto& item : list)
         append(item);
 }
