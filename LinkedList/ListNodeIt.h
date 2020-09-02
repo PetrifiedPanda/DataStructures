@@ -8,12 +8,14 @@ class LinkedList;
 template <typename T>
 class ListNodeIt {
     ListNode<T>* currentNode_;
-    const LinkedList<T>& list_;
 
     friend class LinkedList<T>;
 
    public:
-    ListNodeIt(ListNode<T>* node, const LinkedList<T>& list) : currentNode_(node), list_(list) {}
+    ListNodeIt() : currentNode_(nullptr) {}
+    ListNodeIt(ListNode<T>* node) : currentNode_(node) {}
+    ListNodeIt(const ListNodeIt<T>& other) : currentNode_(other.currentNode_) {}
+    ListNodeIt(ListNodeIt<T>&& other);
 
     ListNodeIt<T>& operator++();
     ListNodeIt<T>& operator--();
@@ -25,10 +27,18 @@ class ListNodeIt {
     bool operator!=(const ListNodeIt<T>& other) const;
 };
 
+// Constructors
+template <typename T>
+ListNodeIt<T>::ListNodeIt(ListNodeIt<T>&& other) : currentNode_(std::move(other.currentNode_)) {
+    other.currentNode_ = nullptr;
+}
+
 // Increment / Decrement operators
 
 template <typename T>
-ListNodeIt<T>& ListNodeIt<T>::operator++() {  // Not bounds checked
+ListNodeIt<T>& ListNodeIt<T>::operator++() {
+    if (currentNode_ == nullptr)
+        throw std::runtime_error("Tried to increment invalid iterator");
     currentNode_ = currentNode_->next.get();
     return *this;
 }
@@ -36,9 +46,8 @@ ListNodeIt<T>& ListNodeIt<T>::operator++() {  // Not bounds checked
 template <typename T>
 ListNodeIt<T>& ListNodeIt<T>::operator--() {
     if (currentNode_ == nullptr)
-        currentNode_ = list_.tail_;
-    else
-        currentNode_ = currentNode_->prev;
+        throw std::runtime_error("Tried to decrement invalid iterator");
+    currentNode_ = currentNode_->prev;
     return *this;
 }
 

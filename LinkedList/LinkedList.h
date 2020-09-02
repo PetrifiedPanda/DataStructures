@@ -210,12 +210,12 @@ void LinkedList<T>::clear() {
 
 template <typename T>
 typename LinkedList<T>::iterator LinkedList<T>::begin() {
-    return iterator(head_.get(), *this);
+    return iterator(head_.get());
 }
 
 template <typename T>
 typename LinkedList<T>::iterator LinkedList<T>::end() {
-    return iterator(nullptr, *this);
+    return iterator(nullptr);
 }
 
 template <typename T>
@@ -230,10 +230,10 @@ typename LinkedList<T>::iterator LinkedList<T>::end() const {
 
 template <typename T>
 typename LinkedList<T>::iterator LinkedList<T>::cbegin() const {
-    return ListNodeIt<T>(head_.get(), *this);
+    return ListNodeIt<T>(head_.get());
 }
 
 template <typename T>
 typename LinkedList<T>::iterator LinkedList<T>::cend() const {
-    return iterator(nullptr, *this);
+    return iterator(nullptr);
 }
