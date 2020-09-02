@@ -16,12 +16,11 @@ class Heap {
     explicit Heap(const std::function<bool(const T&, const T&)>& comp) : comparator_(comp) {}
     Heap(std::initializer_list<T> init, const std::function<bool(const T&, const T&)>& comp);
 
-    Heap(Heap<T>& heap);
-    Heap(Heap<T>&& heap) noexcept;
+    Heap(Heap<T>& heap) : data_(heap.data_), comparator_(heap.comparator_) {}
+    Heap(Heap<T>&& heap) noexcept : data_(std::move(heap.data_)), comparator_(std::move(heap.comparator_)) {}
 
     Heap<T>& operator=(const Heap<T>& heap);
     Heap<T>& operator=(Heap<T>&& heap);
-
     Heap<T>& operator=(std::initializer_list<T> init);
 
     void setComparator(const std::function<bool(const T&, const T&)>& comp);
@@ -63,12 +62,6 @@ Heap<T>::Heap(std::initializer_list<T> init, const std::function<bool(const T&, 
     data_ = init;
     buildHeap();
 }
-
-template <typename T>
-Heap<T>::Heap(Heap<T>& heap) : data_(heap.data_), comparator_(heap.comparator_) {}
-
-template <typename T>
-Heap<T>::Heap(Heap<T>&& heap) noexcept : data_(std::move(heap.data_)), comparator_(std::move(heap.comparator_)) {}
 
 // Equality operators
 
