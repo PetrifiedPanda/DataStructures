@@ -1,8 +1,10 @@
 #pragma once
 
+#include "LinkedList.h"
+
 template <typename T>
 class ListNode {
-public:
+   public:
     T key;
     std::unique_ptr<ListNode<T>> next;
     ListNode<T>* prev;
