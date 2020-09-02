@@ -11,4 +11,5 @@ class TreeNode {
     TreeNode<T>* parent;
 
     TreeNode(const T& key) : key(key), left(nullptr), right(nullptr), parent(nullptr) {}
+    TreeNode(const T& key, TreeNode<T>* parent) : key(key), left(nullptr), right(nullptr), parent(parent) {}
 };
