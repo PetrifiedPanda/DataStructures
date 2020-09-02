@@ -4,16 +4,18 @@
 
 template <typename T>
 class SizeLinkedList : public LinkedList<T> {
-    int size_;
+    size_t size_;
 
    public:
     using iterator = ListNodeIt<T>;
 
     SizeLinkedList() : LinkedList<T>(), size_(0) {}
-    SizeLinkedList(const LinkedList<T>& list);
-    SizeLinkedList(const SizeLinkedList<T>& list);
-    SizeLinkedList(LinkedList<T>&& list) noexcept;
-    SizeLinkedList(SizeLinkedList<T>&& list) noexcept;
+
+    SizeLinkedList(const LinkedList<T>& list) : LinkedList<T>(list), size_(list.computeSize()) {}
+    SizeLinkedList(const SizeLinkedList<T>& list) : LinkedList<T>(list), size_(list.size()) {}
+
+    SizeLinkedList(LinkedList<T>&& list) noexcept : LinkedList<T>(std::move(list)), size_(LinkedList<T>::computeSize()) {}
+    SizeLinkedList(SizeLinkedList<T>&& list) noexcept : LinkedList<T>(std::move(list)), size_(list.size()) {}
     SizeLinkedList(std::initializer_list<T> list);
 
     SizeLinkedList<T>& operator=(const SizeLinkedList<T>& list);
@@ -30,28 +32,16 @@ class SizeLinkedList : public LinkedList<T> {
 
     void clear();
 
-    int size() const;
+    size_t size() const;
 
    private:
     using LinkedList<T>::computeSize;
 };
 
-// Constructor
+// Constructors
 
 template <typename T>
-SizeLinkedList<T>::SizeLinkedList(const LinkedList<T>& list) : LinkedList<T>(list), size_(list.computeSize()) {}
-
-template <typename T>
-SizeLinkedList<T>::SizeLinkedList(const SizeLinkedList<T>& list) : LinkedList<T>(list), size_(list.size()) {}
-
-template <typename T>
-SizeLinkedList<T>::SizeLinkedList(LinkedList<T>&& list) noexcept : LinkedList<T>(std::move(list)), size_(LinkedList<T>::computeSize()) {}
-
-template <typename T>
-SizeLinkedList<T>::SizeLinkedList(SizeLinkedList<T>&& list) noexcept : LinkedList<T>(std::move(list)), size_(list.size()) {}
-
-template <typename T>
-SizeLinkedList<T>::SizeLinkedList(std::initializer_list<T> list) {
+SizeLinkedList<T>::SizeLinkedList(std::initializer_list<T> list) : SizeLinkedList<T>() {
     for (const auto& item : list)
         append(item);
 }
@@ -128,6 +118,6 @@ void SizeLinkedList<T>::clear() {
 }
 
 template <typename T>
-int SizeLinkedList<T>::size() const {
+size_t SizeLinkedList<T>::size() const {
     return size_;
 }
