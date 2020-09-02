@@ -31,9 +31,12 @@ class BinarySearchTree {
 
     void clear();
 
-    std::vector<T> inorder() const;
-    std::vector<T> preorder() const;
-    std::vector<T> postorder() const;
+    template <class Container>
+    Container inorder() const;
+    template <class Container>
+    Container preorder() const;
+    template <class Container>
+    Container postorder() const;
 
     bool isEmpty() const;
 
@@ -78,16 +81,19 @@ class BinarySearchTree {
     size_t subtreeHeight(TreeNode<T>* subTreeRoot) const;
     size_t subtreeSize(TreeNode<T>* subTreeRoot) const;
 
-    void subtreeInorder(TreeNode<T>* subTreeRoot, std::vector<T>& trav) const;
-    void subtreePreorder(TreeNode<T>* subTreeRoot, std::vector<T>& trav) const;
-    void subtreePostorder(TreeNode<T>* subTreeRoot, std::vector<T>& trav) const;
+    template <class Container>
+    void subtreeInorder(TreeNode<T>* subtreeRoot, Container& trav, size_t& currentIndex) const;
+    template <class Container>
+    void subtreePreorder(TreeNode<T>* subtreeRoot, Container& trav, size_t& currentIndex) const;
+    template <class Container>
+    void subtreePostorder(TreeNode<T>* subtreeRoot, Container& trav, size_t& currentIndex) const;
 };
 
 // Constructors
 
 template <typename T>
 BinarySearchTree<T>::BinarySearchTree(const BinarySearchTree<T>& tree) : BinarySearchTree<T>() {
-    std::vector<T> preorderVec = tree.preorder();
+    auto preorderVec = tree.preorder<std::vector<int>>();
 
     for (const T& item : preorderVec)
         insert(item);
@@ -104,7 +110,7 @@ template <typename T>
 BinarySearchTree<T>& BinarySearchTree<T>::operator=(const BinarySearchTree<T>& tree) {
     clear();
 
-    std::vector<T> preorderVec = tree.preorder();
+    auto preorderVec = tree.preorder<std::vector<int>>();
 
     for (const T& item : preorderVec)
         insert(item);
@@ -170,26 +176,29 @@ void BinarySearchTree<T>::clear() {
 // Traversals
 
 template <typename T>
-std::vector<T> BinarySearchTree<T>::inorder() const {
-    std::vector<T> result;
-    result.reserve(computeSize());
-    subtreeInorder(root_.get(), result);
+template <class Container>
+Container BinarySearchTree<T>::inorder() const {
+    Container result(computeSize());
+    size_t currentIndex = 0;
+    subtreeInorder(root_.get(), result, currentIndex);
     return result;
 }
 
 template <typename T>
-std::vector<T> BinarySearchTree<T>::preorder() const {
-    std::vector<T> result;
-    result.reserve(computeSize());
-    subtreePreorder(root_.get(), result);
+template <class Container>
+Container BinarySearchTree<T>::preorder() const {
+    Container result(computeSize());
+    size_t currentIndex = 0;
+    subtreePreorder(root_.get(), result, currentIndex);
     return result;
 }
 
 template <typename T>
-std::vector<T> BinarySearchTree<T>::postorder() const {
-    std::vector<T> result;
-    result.reserve(computeSize());
-    subtreePostorder(root_.get(), result);
+template <class Container>
+Container BinarySearchTree<T>::postorder() const {
+    Container result(computeSize());
+    size_t currentIndex = 0;
+    subtreePostorder(root_.get(), result, currentIndex);
     return result;
 }
 
@@ -489,28 +498,34 @@ size_t BinarySearchTree<T>::subtreeSize(TreeNode<T>* subtreeRoot) const {
 }
 
 template <typename T>
-void BinarySearchTree<T>::subtreeInorder(TreeNode<T>* subTreeRoot, std::vector<T>& trav) const {
-    if (subTreeRoot != nullptr) {
-        subtreeInorder(subTreeRoot->left.get(), trav);
-        trav.push_back(subTreeRoot->key);
-        subtreeInorder(subTreeRoot->right.get(), trav);
+template <class Container>
+void BinarySearchTree<T>::subtreeInorder(TreeNode<T>* subtreeRoot, Container& trav, size_t& currentIndex) const {
+    if (subtreeRoot != nullptr) {
+        subtreeInorder(subtreeRoot->left.get(), trav, currentIndex);
+        trav[currentIndex] = subtreeRoot->key;
+        ++currentIndex;
+        subtreeInorder(subtreeRoot->right.get(), trav, currentIndex);
     }
 }
 
 template <typename T>
-void BinarySearchTree<T>::subtreePreorder(TreeNode<T>* subTreeRoot, std::vector<T>& trav) const {
-    if (subTreeRoot != nullptr) {
-        trav.push_back(subTreeRoot->key);
-        subtreePreorder(subTreeRoot->left.get(), trav);
-        subtreePreorder(subTreeRoot->right.get(), trav);
+template <class Container>
+void BinarySearchTree<T>::subtreePreorder(TreeNode<T>* subtreeRoot, Container& trav, size_t& currentIndex) const {
+    if (subtreeRoot != nullptr) {
+        trav[currentIndex] = subtreeRoot->key;
+        ++currentIndex;
+        subtreePreorder(subtreeRoot->left.get(), trav, currentIndex);
+        subtreePreorder(subtreeRoot->right.get(), trav, currentIndex);
     }
 }
 
 template <typename T>
-void BinarySearchTree<T>::subtreePostorder(TreeNode<T>* subTreeRoot, std::vector<T>& trav) const {
-    if (subTreeRoot != nullptr) {
-        subtreePostorder(subTreeRoot->left.get(), trav);
-        subtreePostorder(subTreeRoot->right.get(), trav);
-        trav.push_back(subTreeRoot->key);
+template <class Container>
+void BinarySearchTree<T>::subtreePostorder(TreeNode<T>* subtreeRoot, Container& trav, size_t& currentIndex) const {
+    if (subtreeRoot != nullptr) {
+        subtreePostorder(subtreeRoot->left.get(), trav, currentIndex);
+        subtreePostorder(subtreeRoot->right.get(), trav, currentIndex);
+        trav[currentIndex] = subtreeRoot->key;
+        ++currentIndex;
     }
 }
