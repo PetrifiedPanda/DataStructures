@@ -19,6 +19,9 @@ class BinarySearchTree {
     BinarySearchTree<T>& operator=(const BinarySearchTree<T>& tree);
     BinarySearchTree<T>& operator=(BinarySearchTree<T>&& tree);
 
+    bool operator==(const BinarySearchTree<T>& other) const;
+    bool operator!=(const BinarySearchTree<T>& other) const;
+
     void insert(const T& key);
 
     void erase(const T& key);
@@ -60,6 +63,8 @@ class BinarySearchTree {
     void rotateRight(TreeNode<T>* node);
 
     TreeNode<T>* findNode(const T& key) const;
+
+    bool subtreeEqual(TreeNode<T>* node, TreeNode<T>* otherNode) const;
 
     TreeNode<T>* subtreeMin(TreeNode<T>* subTreeRoot) const;
     TreeNode<T>* subtreeMax(TreeNode<T>* subTreeRoot) const;
@@ -111,6 +116,18 @@ BinarySearchTree<T>& BinarySearchTree<T>::operator=(BinarySearchTree<T>&& tree) 
     tree.root_ = nullptr;
 
     return *this;
+}
+
+// Comparision operators
+
+template <typename T>
+bool BinarySearchTree<T>::operator==(const BinarySearchTree<T>& other) const {
+    return subtreeEqual(root_.get(), other.root_.get());
+}
+
+template <typename T>
+bool BinarySearchTree<T>::operator!=(const BinarySearchTree<T>& other) const {
+    return !(*this == other);
 }
 
 // Insertion and deletion functions
@@ -353,6 +370,18 @@ TreeNode<T>* BinarySearchTree<T>::findNode(const T& key) const {  // O(h)
     }
 
     return it;
+}
+
+template <typename T>
+bool BinarySearchTree<T>::subtreeEqual(TreeNode<T>* node, TreeNode<T>* otherNode) const {
+    if (node == nullptr && otherNode == nullptr)
+        return true;
+    else if (node == nullptr && otherNode != nullptr || node != nullptr && otherNode == nullptr)
+        return false;
+    else if (node->key != otherNode->key)
+        return false;
+    else
+        return subtreeEqual(node->left.get(), otherNode->left.get()) && subtreeEqual(node->right.get(), otherNode->right.get());
 }
 
 template <typename T>
