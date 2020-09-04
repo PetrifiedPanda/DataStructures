@@ -108,7 +108,8 @@ template <typename T>
 void RedBlackTree<T>::erase(RBTreeNode<T>* toDelete) {
     Color clrOfDeleted = toDelete->color;
     RBTreeNode<T>* replacementParent = toDelete->parent;
-    bool noFixUp = toDelete->left == nullptr || toDelete->right == nullptr;
+    bool oneOrLessChildren = toDelete->left == nullptr || toDelete->right == nullptr;
+
     RBTreeNode<T>* replacement = this->eraseAndReturnReplacement(toDelete);
 
     Color replacementClr = Color::BLACK;
@@ -117,7 +118,7 @@ void RedBlackTree<T>::erase(RBTreeNode<T>* toDelete) {
         replacement->color = clrOfDeleted;
     }
 
-    if (noFixUp && clrOfDeleted == Color::RED)
+    if (oneOrLessChildren && clrOfDeleted == Color::RED)
         return;
 
     if (replacementClr == Color::BLACK)
