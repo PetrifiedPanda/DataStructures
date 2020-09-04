@@ -125,7 +125,7 @@ void RedBlackTree<T>::erase(RBTreeNode<T>* toDelete) {
 }
 
 template <typename T>
-void RedBlackTree<T>::fixColorsAfterInsertion(RBTreeNode<T>* node) {  // Maybe extract some functionality of this into helper functions with descriptive names
+void RedBlackTree<T>::fixColorsAfterInsertion(RBTreeNode<T>* node) {
     while (node->parent != nullptr && node->parent->color == Color::RED) {
         bool parentIsLeftChild;
         RBTreeNode<T>* parentSibling;
@@ -164,7 +164,7 @@ void RedBlackTree<T>::fixColorsAfterInsertion(RBTreeNode<T>* node) {  // Maybe e
 }
 
 template <typename T>
-void RedBlackTree<T>::fixColorsAfterDeletion(RBTreeNode<T>* replacement, RBTreeNode<T>* replacementParent) {  // This is absolutely horrendous
+void RedBlackTree<T>::fixColorsAfterDeletion(RBTreeNode<T>* replacement, RBTreeNode<T>* replacementParent) {
     RBTreeNode<T>* node = replacement;
     RBTreeNode<T>* parent = replacementParent;
     while (parent != nullptr && (node == nullptr || node->color == Color::BLACK)) {
