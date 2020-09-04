@@ -15,10 +15,15 @@ The iterator also contains a reference to the original List, which I plan to cha
 SizeLinkedList is a small attempt at making a LinkedList that saves its size in a variable. I did not work on that one too much.
 
 ## BinarySearchTree
-This one is implemented using std::unique_ptr<> as the left and right child and a raw pointer as the parent node.
-With the iterator you can traverse the tree like you would with Node Pointers.
+The Core of all Data Structures in this folder is BSTBase, which is an almost complete Binary-Search-Tree implementation. It receives the Node type as a template parameter, so you can derive Trees with different Nodes from it. The Node type must use unique_ptr for the left and right children, and a raw pointer for the parent.
+<br/>
+BinarySearchTree is just a redefition of BSTBase with an ordinary implementation of the Nodes.
 <br/>
 SplayTree is a Splay Tree implementation that inherits from BinarySearchTree
+<br/>
+RedBlackTree is a Red-Black-Tree implementation (And the actual reason BSTBase is structured in the way that it is)
+<br/>
+All of these Trees use BSTBaseIt as their iterator, with which you can traverse the tree as you would with a node pointer.
 
 ## BloomFilter
 There are 2 BloomFilter implementations, which both only work for std::strings:
