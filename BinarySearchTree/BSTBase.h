@@ -5,12 +5,6 @@
 #include "TreeNode.h"
 #include "BSTBaseIt.h"
 
-template <typename T, template <typename> class Node>
-class BSTBase;
-
-template <typename T>
-using BinarySearchTree = BSTBase<T, TreeNode>;
-
 // TODO: Add Node-independent copy (and maybe compare) operator, so trees with different node types can be assigned to each other
 
 // T must have < and > operators (Replace with C++20 concepts)
