@@ -17,7 +17,7 @@ SizeLinkedList is a small attempt at making a LinkedList that saves its size in 
 ## BinarySearchTree
 The Core of all Data Structures in this folder is BSTBase, which is an almost complete Binary-Search-Tree implementation. It receives the Node type as a template parameter, so you can derive Trees with different Nodes from it. The Node type must use unique_ptr for the left and right children, and a raw pointer for the parent.
 <br/>
-BinarySearchTree is just a redefition of BSTBase with an ordinary implementation of the Nodes.
+BinarySearchTree is just a redefinition of BSTBase with an ordinary implementation of the Nodes.
 <br/>
 SplayTree is a Splay Tree implementation that inherits from BinarySearchTree
 <br/>
