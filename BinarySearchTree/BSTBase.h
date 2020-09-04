@@ -2,7 +2,6 @@
 
 #include <vector>
 
-#include "TreeNode.h"
 #include "BSTBaseIt.h"
 
 // TODO: Add Node-independent copy (and maybe compare) operator, so trees with different node types can be assigned to each other
