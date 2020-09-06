@@ -21,7 +21,7 @@ BinarySearchTree is just a redefinition of BSTBase with an ordinary implementati
 <br/>
 SplayTree is a Splay Tree implementation that inherits from BinarySearchTree
 <br/>
-RedBlackTree is a Red-Black-Tree implementation (And the actual reason BSTBase is structured in the way that it is)
+RedBlackTree is a Red-Black-Tree implementation. The deletion does not work correctly yet. (And the actual reason BSTBase is structured in the way that it is)
 <br/>
 All of these Trees use BSTBaseIt as their iterator, with which you can traverse the tree as you would with a node pointer.
 
