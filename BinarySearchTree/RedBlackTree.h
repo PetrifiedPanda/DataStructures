@@ -35,7 +35,7 @@ class RedBlackTree : public RBTreeBase<T> {
     void erase(RBTreeNode<T>* node);
 
     void fixColorsAfterInsertion(RBTreeNode<T>* node);
-    void fixColorsAfterDeletion(RBTreeNode<T>* replacement, RBTreeNode<T>* replacementParent);
+    void fixColorsAfterDeletion(RBTreeNode<T>* node, RBTreeNode<T>* parent);
 };
 
 // Assignment operators
@@ -107,22 +107,18 @@ T RedBlackTree<T>::extractMax() {
 template <typename T>
 void RedBlackTree<T>::erase(RBTreeNode<T>* toDelete) {
     Color clrOfDeleted = toDelete->color;
-    RBTreeNode<T>* replacementParent = toDelete->parent;
     bool oneOrLessChildren = toDelete->left == nullptr || toDelete->right == nullptr;
 
-    RBTreeNode<T>* replacement = this->eraseAndReturnReplacement(toDelete);
+    auto [nodeToFix, nodeToFixParent] = this->eraseAndReturnLowestChangedNode(toDelete);
 
     Color replacementClr = Color::BLACK;
-    if (replacement != nullptr) {
-        replacementClr = replacement->color;
-        replacement->color = clrOfDeleted;
+    if (nodeToFix != nullptr) {
+        replacementClr = nodeToFix->color;
+        nodeToFix->color = clrOfDeleted;
     }
 
-    if (oneOrLessChildren && clrOfDeleted == Color::RED)
-        return;
-
-    if (replacementClr == Color::BLACK)
-        fixColorsAfterDeletion(replacement, replacementParent);
+    if (replacementClr == Color::BLACK && (!oneOrLessChildren || clrOfDeleted == Color::BLACK))
+        fixColorsAfterDeletion(nodeToFix, nodeToFixParent);
 }
 
 template <typename T>
@@ -165,25 +161,23 @@ void RedBlackTree<T>::fixColorsAfterInsertion(RBTreeNode<T>* node) {
 }
 
 template <typename T>
-void RedBlackTree<T>::fixColorsAfterDeletion(RBTreeNode<T>* replacement, RBTreeNode<T>* replacementParent) {
-    RBTreeNode<T>* node = replacement;
-    RBTreeNode<T>* parent = replacementParent;
+void RedBlackTree<T>::fixColorsAfterDeletion(RBTreeNode<T>* node, RBTreeNode<T>* parent) {
     while (parent != nullptr && (node == nullptr || node->color == Color::BLACK)) {
-        bool isLeftChild;
         RBTreeNode<T>* sibling;
+        bool nodeIsLeftChild;
         if (node == parent->left.get()) {
             sibling = parent->right.get();
-            isLeftChild = true;
+            nodeIsLeftChild = true;
         } else {
             sibling = parent->left.get();
-            isLeftChild = false;
+            nodeIsLeftChild = false;
         }
 
         if (sibling != nullptr && sibling->color == Color::RED) {
             sibling->color = Color::BLACK;
             parent->color = Color::RED;
 
-            if (isLeftChild) {
+            if (nodeIsLeftChild) {
                 rotateLeft(parent);
                 sibling = parent->right.get();
             } else {
@@ -199,24 +193,22 @@ void RedBlackTree<T>::fixColorsAfterDeletion(RBTreeNode<T>* replacement, RBTreeN
                 sibling->color = Color::RED;
             node = parent;
         } else {
-            if (isLeftChild && (sibling->right == nullptr || sibling->right->color == Color::BLACK)) {
+            if (nodeIsLeftChild && (sibling->right == nullptr || sibling->right->color == Color::BLACK)) {
                 sibling->left->color = Color::BLACK;
                 sibling->color = Color::RED;
                 rotateRight(sibling);
 
                 sibling = parent->right.get();
-            } else if (!isLeftChild && (sibling->left == nullptr || sibling->left->color == Color::BLACK)) {
+            } else if (!nodeIsLeftChild && (sibling->left == nullptr || sibling->left->color == Color::BLACK)) {
                 sibling->right->color = Color::BLACK;
                 sibling->color = Color::RED;
                 rotateLeft(sibling);
 
                 sibling = parent->left.get();
             }
-
             sibling->color = parent->color;
             parent->color = Color::BLACK;
-
-            if (isLeftChild) {
+            if (nodeIsLeftChild) {
                 sibling->right->color = Color::BLACK;
                 rotateLeft(parent);
             } else {
@@ -225,11 +217,9 @@ void RedBlackTree<T>::fixColorsAfterDeletion(RBTreeNode<T>* replacement, RBTreeN
             }
 
             node = this->root_.get();
-            break;
         }
-
-        parent = node == nullptr ? replacementParent : node->parent;
+        parent = node == nullptr ? parent : node->parent;
     }
     if (node != nullptr)
-        node->color = Color::BLACK;
+        node->color == Color::BLACK;
 }
