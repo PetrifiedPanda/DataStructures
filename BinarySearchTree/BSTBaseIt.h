@@ -69,6 +69,7 @@ BSTBaseIt<T, Node>& BSTBaseIt<T, Node>::left() {
     if (!isValid())
         throw std::runtime_error("Tried to move to left node of null node");
     currentNode_ = currentNode_->left.get();
+    return *this;
 }
 
 template <typename T, template <typename Type> class Node>
@@ -83,6 +84,7 @@ BSTBaseIt<T, Node>& BSTBaseIt<T, Node>::right() {
     if (!isValid())
         throw std::runtime_error("Tried to move to right node of null node");
     currentNode_ = currentNode_->right.get();
+    return *this;
 }
 
 template <typename T, template <typename Type> class Node>
@@ -97,6 +99,7 @@ BSTBaseIt<T, Node>& BSTBaseIt<T, Node>::parent() {
     if (!isValid())
         throw std::runtime_error("Tried to move to parent of null node");
     currentNode_ = currentNode_->parent;
+    return *this;
 }
 
 template <typename T, template <typename Type> class Node>
