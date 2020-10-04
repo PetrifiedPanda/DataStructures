@@ -45,6 +45,7 @@ SplayTree<T>& SplayTree<T>::operator=(const SplayTree<T>& tree) {
 template <typename T>
 SplayTree<T>& SplayTree<T>::operator=(SplayTree<T>&& tree) {
     BinarySearchTree<T>::operator=(std::move(tree));
+    return *this;
 }
 
 // Insertion operation
