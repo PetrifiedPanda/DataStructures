@@ -3,11 +3,13 @@
 BloomFilter& BloomFilter::operator=(const BloomFilter& filter) {
     data_ = filter.data_;
     hashes_ = filter.hashes_;
+    return *this;
 }
 
 BloomFilter& BloomFilter::operator=(BloomFilter&& filter) {
     data_ = std::move(filter.data_);
     hashes_ = std::move(filter.hashes_);
+    return *this;
 }
 
 void BloomFilter::add(const std::string& word) {

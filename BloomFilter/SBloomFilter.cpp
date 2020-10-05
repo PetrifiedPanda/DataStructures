@@ -3,11 +3,13 @@
 SBloomFilter& SBloomFilter::operator=(const SBloomFilter& filter) {
     data_ = filter.data_;
     hashes_ = filter.hashes_;
+    return *this;
 }
 
 SBloomFilter& SBloomFilter::operator=(SBloomFilter&& filter) {
     data_ = std::move(filter.data_);
     hashes_ = std::move(filter.hashes_);
+    return *this;
 }
 
 void SBloomFilter::add(const std::string& word) {
