@@ -83,6 +83,7 @@ template <typename T>
 Heap<T>& Heap<T>::operator=(std::initializer_list<T> init) {
     data_ = init;
     buildHeap();
+    return *this;
 }
 
 template <typename T>

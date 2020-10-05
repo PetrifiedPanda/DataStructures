@@ -52,24 +52,29 @@ template <typename T>
 SizeLinkedList<T>& SizeLinkedList<T>::operator=(const SizeLinkedList<T>& list) {
     LinkedList<T>::operator=(list);
     size_ = list.size_;
+    return *this;
 }
 
 template <typename T>
 SizeLinkedList<T>& SizeLinkedList<T>::operator=(const LinkedList<T>& list) {
     LinkedList<T>::operator=(list);
     size_ = LinkedList<T>::computeSize();
+    return *this;
 }
 
 template <typename T>
 SizeLinkedList<T>& SizeLinkedList<T>::operator=(SizeLinkedList<T>&& list) {
     LinkedList<T>::operator=(std::move(list));
     size_ = list.size_;
+    return *this;
 }
 
 template <typename T>
 SizeLinkedList<T>& SizeLinkedList<T>::operator=(LinkedList<T>&& list) {
     LinkedList<T>::operator=(std::move(list));
     size_ = LinkedList<T>::computeSize();
+
+    return *this;
 }
 
 template <typename T>
@@ -78,6 +83,8 @@ SizeLinkedList<T>& SizeLinkedList<T>::operator=(std::initializer_list<T> list) {
 
     for (const auto& item : list)
         append(item);
+
+    return *this;
 }
 
 // Insertion functions
