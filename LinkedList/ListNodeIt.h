@@ -17,8 +17,16 @@ class ListNodeIt {
     ListNodeIt(const ListNodeIt<T>& other) : currentNode_(other.currentNode_) {}
     ListNodeIt(ListNodeIt<T>&& other);
 
+    ListNodeIt<T>& operator=(const ListNodeIt<T>& other);
+    ListNodeIt<T>& operator=(ListNodeIt<T>&& other);
+
     ListNodeIt<T>& operator++();
     ListNodeIt<T>& operator--();
+
+    ListNodeIt<T> next() const;
+    ListNodeIt<T> prev() const;
+
+    bool isValid() const;
 
     T& operator*();
     const T& operator*() const;
@@ -29,8 +37,23 @@ class ListNodeIt {
 
 // Constructors
 template <typename T>
-ListNodeIt<T>::ListNodeIt(ListNodeIt<T>&& other) : currentNode_(std::move(other.currentNode_)) {
+ListNodeIt<T>::ListNodeIt(ListNodeIt<T>&& other) : currentNode_(other.currentNode_) {
     other.currentNode_ = nullptr;
+}
+
+// Assignment operators
+
+template <typename T>
+ListNodeIt<T>& ListNodeIt<T>::operator=(const ListNodeIt<T>& other) {
+    currentNode_ = other.currentNode_;
+    return *this;
+}
+
+template <typename T>
+ListNodeIt<T>& ListNodeIt<T>::operator=(ListNodeIt<T>&& other) {
+    currentNode_ = other.currentNode_;
+    other.currentNode_ = nullptr;
+    return *this;
 }
 
 // Increment / Decrement operators
@@ -49,6 +72,21 @@ ListNodeIt<T>& ListNodeIt<T>::operator--() {
         throw std::runtime_error("Tried to decrement invalid iterator");
     currentNode_ = currentNode_->prev;
     return *this;
+}
+
+template <typename T>
+ListNodeIt<T> ListNodeIt<T>::next() const {
+    return currentNode_->next == nullptr ? nullptr : currentNode_->next.get();
+}
+
+template <typename T>
+ListNodeIt<T> ListNodeIt<T>::prev() const {
+    return currentNode_->prev == nullptr ? nullptr : currentNode_->prev.get();
+}
+
+template <typename T>
+bool ListNodeIt<T>::isValid() const {
+    return currentNode_ != nullptr;
 }
 
 // Dereference operators
