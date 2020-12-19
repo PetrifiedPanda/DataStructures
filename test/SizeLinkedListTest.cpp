@@ -79,7 +79,33 @@ TEST_F(SizeLinkedListTests, Insertion) {
 }
 
 TEST_F(SizeLinkedListTests, Deletion) {
-    EXPECT_TRUE(false) << "Tests not implemented";
+    lst.erase(++++lst.begin());
+
+    EXPECT_EQ(4, lst.size());
+
+    EXPECT_EQ(1, *lst.begin());
+    EXPECT_EQ(2, *++lst.begin());
+    EXPECT_EQ(4, *++++lst.begin());
+    EXPECT_EQ(5, *++++++lst.begin());
+
+    lst.erase(lst.begin());
+    
+    EXPECT_EQ(3, lst.size());
+
+    EXPECT_EQ(2, *lst.begin());
+    EXPECT_EQ(4, *++lst.begin());
+    EXPECT_EQ(5, *++++lst.begin());
+
+    auto it = lst.begin();
+    while (it.next().isValid())
+        ++it;
+    
+    lst.erase(it);
+
+    EXPECT_EQ(2, lst.size());
+
+    EXPECT_EQ(2, *lst.begin());
+    EXPECT_EQ(4, *++lst.begin());
 }
 
 TEST_F(SizeLinkedListTests, RangeDeletion) {
