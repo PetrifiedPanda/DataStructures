@@ -200,7 +200,6 @@ TEST_F(RedBlackTreeRandomTests, InsertTests) {
     }
 }
 
-// Because these tests work, deletion of nodes with zero to one children should work
 TEST_F(RedBlackTreeRandomTests, ExtractMax) {
     int lastMax = std::numeric_limits<int>::max();
     while (!tree.isEmpty()) {
