@@ -1,7 +1,7 @@
 #pragma once
 
-#include "RBTreeNode.h"
 #include "BSTBase.h"
+#include "RBTreeNode.h"
 
 template <typename T>
 using RBTreeBase = BSTBase<T, RBTreeNode>;
@@ -35,7 +35,7 @@ class RedBlackTree : public RBTreeBase<T> {
     void erase(RBTreeNode<T>* node);
 
     void fixColorsAfterInsertion(RBTreeNode<T>* node);
-    void fixColorsAfterDeletion(RBTreeNode<T>* node, RBTreeNode<T>* parent);
+    void fixDoubleBlack(RBTreeNode<T>* node);
 };
 
 // Assignment operators
@@ -48,6 +48,7 @@ RedBlackTree<T>& RedBlackTree<T>::operator=(const RedBlackTree<T>& other) {
 template <typename T>
 RedBlackTree<T>& RedBlackTree<T>::operator=(RedBlackTree<T>&& other) {
     RBTreeBase<T>::operator=(std::move(other));
+    return *this;
 }
 
 // Insertion operation
@@ -106,19 +107,55 @@ T RedBlackTree<T>::extractMax() {
 
 template <typename T>
 void RedBlackTree<T>::erase(RBTreeNode<T>* toDelete) {
-    Color clrOfDeleted = toDelete->color;
-    bool oneOrLessChildren = toDelete->left == nullptr || toDelete->right == nullptr;
+    RBTreeNode<T>* replacement = this->findReplacement(toDelete);
+    bool bothBlack = (replacement == nullptr || replacement->color == Color::BLACK) && (toDelete->color == Color::BLACK);
 
-    auto [nodeToFix, nodeToFixParent] = this->eraseAndReturnLowestChangedNode(toDelete);
+    RBTreeNode<T>* parent = toDelete->parent;
 
-    Color replacementClr = Color::BLACK;
-    if (nodeToFix != nullptr) {
-        replacementClr = nodeToFix->color;
-        nodeToFix->color = clrOfDeleted;
+    if (replacement == nullptr) {
+        if (toDelete == this->root_.get()) {
+           this->root_ = nullptr;
+        } else {
+            if (bothBlack) {
+               fixDoubleBlack(toDelete);
+            } else {
+                if (toDelete == toDelete->parent->left.get() && toDelete->parent->right != nullptr) {
+                    toDelete->parent->right->color = Color::RED;
+                } else if (toDelete == toDelete->parent->right.get() && toDelete->parent->left != nullptr) {
+                    toDelete->parent->left->color = Color::RED;
+                }
+            }
+
+            if (toDelete == parent->left.get())
+                parent->left = nullptr;
+            else
+                parent->right = nullptr;
+        }
+    } else if (toDelete->left == nullptr || toDelete->right == nullptr) {
+        // Because toDelete has only one child, that child must be replacement
+        if (toDelete == this->root_.get()) {
+           toDelete->key = replacement->key;
+           toDelete->left =  nullptr;
+           toDelete->right = nullptr;
+        } else {
+            bool isLeft = toDelete == toDelete->parent->left.get();
+
+            if (isLeft)
+               parent->left = std::move(this->getUnique(replacement));
+            else
+                parent->right = std::move(this->getUnique(replacement));
+            
+            replacement->parent = parent;
+
+            if (bothBlack)
+                fixDoubleBlack(replacement);
+            else
+                replacement->color = Color::BLACK;
+        }
+    } else {
+        std::swap(toDelete->key, replacement->key);
+        erase(replacement);
     }
-
-    if (replacementClr == Color::BLACK && (!oneOrLessChildren || clrOfDeleted == Color::BLACK))
-        fixColorsAfterDeletion(nodeToFix, nodeToFixParent);
 }
 
 template <typename T>
@@ -161,65 +198,60 @@ void RedBlackTree<T>::fixColorsAfterInsertion(RBTreeNode<T>* node) {
 }
 
 template <typename T>
-void RedBlackTree<T>::fixColorsAfterDeletion(RBTreeNode<T>* node, RBTreeNode<T>* parent) {
-    while (parent != nullptr && (node == nullptr || node->color == Color::BLACK)) {
-        RBTreeNode<T>* sibling;
-        bool nodeIsLeftChild;
-        if (node == parent->left.get()) {
-            sibling = parent->right.get();
-            nodeIsLeftChild = true;
-        } else {
-            sibling = parent->left.get();
-            nodeIsLeftChild = false;
-        }
+void RedBlackTree<T>::fixDoubleBlack(RBTreeNode<T>* node) {
+    while (node != this->root_.get()) {
+        RBTreeNode<T>* parent = node->parent;
 
-        if (sibling != nullptr && sibling->color == Color::RED) {
-            sibling->color = Color::BLACK;
-            parent->color = Color::RED;
-
-            if (nodeIsLeftChild) {
-                rotateLeft(parent);
-                sibling = parent->right.get();
-            } else {
-                rotateRight(parent);
-                sibling = parent->left.get();
-            }
-        }
-
-        if (sibling == nullptr ||
-            ((sibling->left == nullptr || sibling->left->color == Color::BLACK) &&
-             (sibling->right == nullptr || sibling->right->color == Color::BLACK))) {
-            if (sibling != nullptr)
-                sibling->color = Color::RED;
+        if ((node == parent->left.get() && parent->right == nullptr) || 
+            (node == parent->right.get() && parent->left == nullptr)) {
             node = parent;
         } else {
-            if (nodeIsLeftChild && (sibling->right == nullptr || sibling->right->color == Color::BLACK)) {
-                sibling->left->color = Color::BLACK;
-                sibling->color = Color::RED;
-                rotateRight(sibling);
+            RBTreeNode<T>* sibling = node == parent->left.get() ? parent->right.get() : parent->left.get();
+            if (sibling->color == Color::RED) {
+                parent->color = Color::RED;
+                sibling->color = Color::BLACK;
 
-                sibling = parent->right.get();
-            } else if (!nodeIsLeftChild && (sibling->left == nullptr || sibling->left->color == Color::BLACK)) {
-                sibling->right->color = Color::BLACK;
-                sibling->color = Color::RED;
-                rotateLeft(sibling);
-
-                sibling = parent->left.get();
-            }
-            sibling->color = parent->color;
-            parent->color = Color::BLACK;
-            if (nodeIsLeftChild) {
-                sibling->right->color = Color::BLACK;
-                rotateLeft(parent);
+                if (sibling == parent->left.get())
+                    this->rotateRight(parent);
+                else
+                    this->rotateLeft(parent);
             } else {
-                sibling->left->color = Color::BLACK;
-                rotateRight(parent);
+                if ((sibling->left != nullptr && sibling->left->color == Color::RED) || 
+                    (sibling->right != nullptr && sibling->right->color == Color::RED)) {
+                
+                    if (sibling->left != nullptr && sibling->left->color == Color::RED) {
+                        if (sibling == sibling->parent->left.get()) {
+                            sibling->left->color = sibling->color;
+                            sibling->color = parent->color;
+                            this->rotateRight(parent);
+                        } else {
+                            sibling->left->color = parent->color;
+                            this->rotateRight(sibling);
+                            this->rotateLeft(parent);
+                        }
+                    } else {
+                        if (sibling == sibling->parent->left.get()) {
+                            sibling->right->color = parent->color;
+                            this->rotateLeft(sibling);
+                            this->rotateRight(parent);
+                        } else {
+                            sibling->right->color = sibling->color;
+                            sibling->color = parent->color;
+                            this->rotateLeft(parent);
+                        }
+                    }
+                    parent->color = Color::BLACK;
+                    break;
+                } else {
+                    sibling->color = Color::RED;
+                    if (parent->color = Color::BLACK)
+                        node = parent;
+                    else {
+                        parent->color = Color::BLACK;
+                        break;
+                    }
+                }
             }
-
-            node = this->root_.get();
         }
-        parent = node == nullptr ? parent : node->parent;
     }
-    if (node != nullptr)
-        node->color == Color::BLACK;
 }

@@ -63,7 +63,8 @@ class BSTBase {
     void invalidateIterator(iterator& it);
 
     Node<T>* insertAndReturnNewNode(const T& key);
-    std::pair<Node<T>*, Node<T>*> eraseAndReturnLowestChangedNode(Node<T>* toDelete);
+    void erase(Node<T>* toDelete);
+    Node<T>* findReplacement(Node<T>* node);
 
     void rotateLeft(Node<T>* node);
     void rotateRight(Node<T>* node);
@@ -148,13 +149,13 @@ template <typename T, template <typename> class Node>
 void BSTBase<T, Node>::erase(const T& key) {  // O(h)
     Node<T>* toDelete = findNode(key);
     if (toDelete != nullptr)
-        eraseAndReturnLowestChangedNode(toDelete);
+        erase(toDelete);
 }
 
 template <typename T, template <typename> class Node>
 void BSTBase<T, Node>::erase(iterator& it) {
     if (it.currentNode_ != nullptr) {
-        eraseAndReturnLowestChangedNode(it.currentNode_);
+        erase(it.currentNode_);
         invalidateIterator(it);
     }
 }
@@ -162,7 +163,7 @@ void BSTBase<T, Node>::erase(iterator& it) {
 template <typename T, template <typename> class Node>
 void BSTBase<T, Node>::erase(iterator&& it) {
     if (it.currentNode_ != nullptr) {
-        eraseAndReturnLowestChangedNode(it.currentNode_);
+        erase(it.currentNode_);
         invalidateIterator(it);
     }
 }
@@ -314,21 +315,14 @@ Node<T>* BSTBase<T, Node>::insertAndReturnNewNode(const T& key) {
     }
 }
 
-// This returns the lowest node that was changed in the deletion and its parent, in case the changed node is nullptr
 template <typename T, template <typename> class Node>
-std::pair<Node<T>*, Node<T>*> BSTBase<T, Node>::eraseAndReturnLowestChangedNode(Node<T>* toDelete) {
-    Node<T>* replacement;
-    Node<T>* result;
-    Node<T>* resultParent = toDelete->parent;
+void BSTBase<T, Node>::erase(Node<T>* toDelete) {
     if (toDelete->left == nullptr) {
-        result = toDelete->right.get();
         transplant(toDelete, toDelete->right);
     } else if (toDelete->right == nullptr) {
-        result = toDelete->left.get();
         transplant(toDelete, toDelete->left);
     } else {
-        replacement = subtreeMin(toDelete->right.get());
-        result = replacement->right.get();
+        Node<T>* replacement = subtreeMin(toDelete->right.get());
 
         if (replacement->parent != toDelete) {
             Node<T>* rParent = replacement->parent;
@@ -349,16 +343,23 @@ std::pair<Node<T>*, Node<T>*> BSTBase<T, Node>::eraseAndReturnLowestChangedNode(
 
             transplant(toDelete, tmp);
         } else {
-            resultParent = replacement->parent;
-
             replacement->left = std::move(toDelete->left);
             replacement->left->parent = replacement;
             transplant(toDelete, getUnique(replacement));
         }
-        if (result != nullptr)
-            resultParent = result->parent;
     }
-    return std::make_pair(result, resultParent);
+}
+
+template <typename T, template <typename> class Node>
+Node<T>* BSTBase<T, Node>::findReplacement(Node<T>* node) {
+    if (node->left == nullptr && node->right == nullptr)
+        return nullptr;
+    else if (node->left == nullptr)
+        return node->right.get();
+    else if (node->right == nullptr)
+        return node->left.get();
+    else
+        return subtreeMin(node->right.get());
 }
 
 // Rotations
