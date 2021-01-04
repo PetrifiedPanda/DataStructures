@@ -242,13 +242,13 @@ typename RedBlackTree<int>::iterator getRandomNode(const RedBlackTree<int>& tree
 
         if (it.hasLeftChild() && it.hasRightChild()) {
             if (dist(engine) < 50)
-                it.left();
+                it = it.left();
             else
-                it.right();
+                it = it.right();
         } else if (it.hasLeftChild())
-            it.left();
+            it = it.left();
         else if (it.hasRightChild())
-            it.right();
+            it = it.right();
         else
             return it;
 

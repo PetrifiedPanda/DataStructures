@@ -21,14 +21,11 @@ class BSTBaseIt {
 
     const T& key() const;
 
-    BSTBaseIt<T, Node>& left();
-    BSTBaseIt<T, Node> getLeft() const;
+    BSTBaseIt<T, Node> left() const;
 
-    BSTBaseIt<T, Node>& right();
-    BSTBaseIt<T, Node> getRight() const;
+    BSTBaseIt<T, Node> right() const;
 
-    BSTBaseIt<T, Node>& parent();
-    BSTBaseIt<T, Node> getParent() const;
+    BSTBaseIt<T, Node> parent() const;
 
     void invalidate();
 };
@@ -67,45 +64,21 @@ const T& BSTBaseIt<T, Node>::key() const {
 }
 
 template <typename T, template <typename Type> class Node>
-BSTBaseIt<T, Node>& BSTBaseIt<T, Node>::left() {
-    if (!isValid())
-        throw std::runtime_error("Tried to move to left node of null node");
-    currentNode_ = currentNode_->left.get();
-    return *this;
-}
-
-template <typename T, template <typename Type> class Node>
-BSTBaseIt<T, Node> BSTBaseIt<T, Node>::getLeft() const {
+BSTBaseIt<T, Node> BSTBaseIt<T, Node>::left() const {
     if (!isValid())
         throw std::runtime_error("Tried to get left child of null node");
     return BSTBaseIt(currentNode_->left.get());
 }
 
 template <typename T, template <typename Type> class Node>
-BSTBaseIt<T, Node>& BSTBaseIt<T, Node>::right() {
-    if (!isValid())
-        throw std::runtime_error("Tried to move to right node of null node");
-    currentNode_ = currentNode_->right.get();
-    return *this;
-}
-
-template <typename T, template <typename Type> class Node>
-BSTBaseIt<T, Node> BSTBaseIt<T, Node>::getRight() const {
+BSTBaseIt<T, Node> BSTBaseIt<T, Node>::right() const {
     if (!isValid())
         throw std::runtime_error("Tried to get right child of null node");
     return BSTBaseIt(currentNode_->right.get());
 }
 
 template <typename T, template <typename Type> class Node>
-BSTBaseIt<T, Node>& BSTBaseIt<T, Node>::parent() {
-    if (!isValid())
-        throw std::runtime_error("Tried to move to parent of null node");
-    currentNode_ = currentNode_->parent;
-    return *this;
-}
-
-template <typename T, template <typename Type> class Node>
-BSTBaseIt<T, Node> BSTBaseIt<T, Node>::getParent() const {
+BSTBaseIt<T, Node> BSTBaseIt<T, Node>::parent() const {
     if (!isValid())
         throw std::runtime_error("Tried to get parent of null node");
     return BSTBaseIt(currentNode_->parent);

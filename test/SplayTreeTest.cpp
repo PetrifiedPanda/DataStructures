@@ -33,7 +33,7 @@ TEST_F(SplayTreeTests, BasicUsage) {
     auto it = myTree.find(5);
     EXPECT_EQ(5, myTree.root().key());
 
-    myTree.erase(it.getLeft());
+    myTree.erase(it.left());
     EXPECT_EQ(5, myTree.root().key());
     EXPECT_EQ(7.5, myTree.root().right().key());
 

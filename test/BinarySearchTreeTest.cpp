@@ -68,23 +68,23 @@ TEST_F(BinarySearchTreeTests, Insertion) {
     auto it = tree.root();
     EXPECT_EQ(40, it.key());
 
-    auto leftIt = it.getLeft();
+    auto leftIt = it.left();
     EXPECT_EQ(20, leftIt.key());
-    auto rightIt = it.getRight();
+    auto rightIt = it.right();
     EXPECT_EQ(60, rightIt.key());
 
-    leftIt.left();
+    leftIt = leftIt.left();
     EXPECT_EQ(10, leftIt.key());
-    leftIt.parent();
+    leftIt = leftIt.parent();
     EXPECT_EQ(20, leftIt.key());
-    leftIt.right();
+    leftIt = leftIt.right();
     EXPECT_EQ(30, leftIt.key());
 
-    rightIt.left();
+    rightIt = rightIt.left();
     EXPECT_EQ(50, rightIt.key());
-    rightIt.parent();
+    rightIt = rightIt.parent();
     EXPECT_EQ(60, rightIt.key());
-    rightIt.right();
+    rightIt = rightIt.right();
     EXPECT_EQ(70, rightIt.key());
 }
 
@@ -94,14 +94,14 @@ TEST_F(BinarySearchTreeTests, Deletion) {
     auto it = tree.root();
     EXPECT_EQ(50, it.key());
 
-    auto leftIt = it.getLeft();
+    auto leftIt = it.left();
     EXPECT_EQ(20, leftIt.key());
-    auto rightIt = it.getRight();
+    auto rightIt = it.right();
     EXPECT_EQ(60, rightIt.key());
 
-    auto nullNode = rightIt.getLeft();
+    auto nullNode = rightIt.left();
     EXPECT_FALSE(nullNode.isValid());
-    rightIt.right();
+    rightIt = rightIt.right();
     EXPECT_EQ(70, rightIt.key());
 
     auto rootIt = tree.root();
