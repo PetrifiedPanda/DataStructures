@@ -4,15 +4,12 @@
 #include <functional>
 #include <vector>
 
-#include "HeapIt.h"
-
 template <typename T>
 class Heap {
     std::vector<T> data_;
     std::function<bool(const T&, const T&)> comparator_;
 
    public:
-    using iterator = HeapIt<T>;
     explicit Heap(const std::function<bool(const T&, const T&)>& comp) : comparator_(comp) {}
     Heap(std::initializer_list<T> init, const std::function<bool(const T&, const T&)>& comp);
 
@@ -29,18 +26,9 @@ class Heap {
 
     T extractExtremum();
 
-    void erase(iterator it);
-
     void clear();
 
     size_t size();
-
-    iterator begin();
-    iterator end();
-    iterator begin() const;
-    iterator end() const;
-    iterator cbegin() const;
-    iterator cend() const;
 
    private:
     void downHeapify(size_t startIndex);
@@ -117,15 +105,6 @@ T Heap<T>::extractExtremum() {
 }
 
 template <typename T>
-void Heap<T>::erase(iterator it) {
-    size_t deleteIndex = it.currentIndex_;
-    data_[deleteIndex] = data_[data_.size() - 1];
-    data_.erase(--data_.end());
-    if (deleteIndex != data_.size())
-        biDirHeapify(deleteIndex);
-}
-
-template <typename T>
 void Heap<T>::clear() {
     data_.clear();
 }
@@ -133,38 +112,6 @@ void Heap<T>::clear() {
 template <typename T>
 size_t Heap<T>::size() {
     return data_.size();
-}
-
-// Iterators
-
-template <typename T>
-typename Heap<T>::iterator Heap<T>::begin() {
-    return iterator(&data_[0], 0);
-}
-
-template <typename T>
-typename Heap<T>::iterator Heap<T>::end() {
-    return iterator(&data_[0] + data_.size(), data_.size());
-}
-
-template <typename T>
-typename Heap<T>::iterator Heap<T>::begin() const {
-    return cbegin();
-}
-
-template <typename T>
-typename Heap<T>::iterator Heap<T>::end() const {
-    return cend();
-}
-
-template <typename T>
-typename Heap<T>::iterator Heap<T>::cbegin() const {
-    return iterator(&data_[0], 0);
-}
-
-template <typename T>
-typename Heap<T>::iterator Heap<T>::cend() const {
-    return iterator(&data_[0] + data_.size(), data_.size());
 }
 
 // Utility functions
