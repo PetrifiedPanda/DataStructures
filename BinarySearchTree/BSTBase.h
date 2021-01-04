@@ -83,6 +83,8 @@ class BSTBase {
     size_t subtreeHeight(Node<T>* subTreeRoot) const;
     size_t subtreeSize(Node<T>* subTreeRoot) const;
 
+    std::unique_ptr<Node<T>> copySubtree(const Node<T>* node);
+
     template <class Container>
     void subtreeInorder(Node<T>* subtreeRoot, Container& trav, size_t& currentIndex) const;
     template <class Container>
@@ -95,10 +97,7 @@ class BSTBase {
 
 template <typename T, template <typename> class Node>
 BSTBase<T, Node>::BSTBase(const BSTBase<T, Node>& tree) : BSTBase<T, Node>() {
-    auto preorderVec = tree.preorder<std::vector<T>>();
-
-    for (const T& item : preorderVec)
-        insert(item);
+    root_ = copySubtree(tree.root_.get());
 }
 
 template <typename T, template <typename> class Node>
@@ -110,12 +109,7 @@ BSTBase<T, Node>::BSTBase(BSTBase<T, Node>&& tree) noexcept : root_(std::move(tr
 
 template <typename T, template <typename> class Node>
 BSTBase<T, Node>& BSTBase<T, Node>::operator=(const BSTBase<T, Node>& tree) {
-    auto preorderVec = tree.preorder<std::vector<T>>();
-
-    clear();
-
-    for (const T& item : preorderVec)
-        insert(item);
+    root_ = copySubtree(tree.root_.get());
     
     return *this;
 }
@@ -509,6 +503,22 @@ size_t BSTBase<T, Node>::subtreeSize(Node<T>* subtreeRoot) const {
         return 0;
 
     return subtreeSize(subtreeRoot->right.get()) + subtreeSize(subtreeRoot->left.get()) + 1;
+}
+
+template <typename T, template <typename> class Node>
+std::unique_ptr<Node<T>> BSTBase<T, Node>::copySubtree(const Node<T>* subtreeRoot) {
+    if (subtreeRoot == nullptr) {
+        return nullptr;
+    } else {
+        auto result = std::make_unique<Node<T>>(*subtreeRoot);
+        result->left = copySubtree(subtreeRoot->left.get());
+        if (result->left != nullptr)
+            result->left->parent = result.get();
+        result->right = copySubtree(subtreeRoot->right.get());
+        if (result->right != nullptr)
+            result->right->parent = result.get();
+        return result;
+    }
 }
 
 template <typename T, template <typename> class Node>

@@ -13,9 +13,10 @@
     NodeType<T>* parent; \
     \
     NodeType(const T& key) : key(key), left(nullptr), right(nullptr), parent(nullptr) {} \
-    NodeType(const T& key, NodeType<T>* parent) : key(key), left(nullptr), right(nullptr), parent(parent) {}
+    NodeType(const T& key, NodeType<T>* parent) : key(key), left(nullptr), right(nullptr), parent(parent) {} \
+    NodeType(const NodeType<T>& other) : key(other.key), left(nullptr), right(nullptr), parent(nullptr) {}
 
-// The varargs should be used to initialize other members of the node
+// The varargs should be used to initialize other members of the node and a copy constructor must be provided (analogous to the one in BasicTreeNode())
 #define TreeNode(NodeType, T, ...) \
     T key; \
     std::unique_ptr<NodeType<T>> left; \

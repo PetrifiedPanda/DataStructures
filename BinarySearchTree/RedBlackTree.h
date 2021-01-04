@@ -14,6 +14,9 @@ class RBTreeNode {
 
     Color color;
     TreeNode(RBTreeNode, T, color(RED));
+    RBTreeNode(const RBTreeNode<T>& other) : RBTreeNode<T>(other.key) {
+        color = other.color;
+    }
 };
 
 template <typename T>
