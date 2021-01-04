@@ -70,7 +70,7 @@ void SplayTree<T>::erase(iterator& it) {
     BSTNode<T>* itNode = this->getPtr(it);
     if (itNode != nullptr) {
         erase(itNode);
-        this->invalidateIterator(it);
+        it.invalidate();
     }
 }
 
@@ -79,7 +79,7 @@ void SplayTree<T>::erase(iterator&& it) {
     BSTNode<T>* itNode = this->getPtr(it);
     if (itNode != nullptr) {
         erase(itNode);
-        this->invalidateIterator(it);
+        it.invalidate();
     }
 }
 

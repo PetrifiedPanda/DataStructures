@@ -29,6 +29,8 @@ class BSTBaseIt {
 
     BSTBaseIt<T, Node>& parent();
     BSTBaseIt<T, Node> getParent() const;
+
+    void invalidate();
 };
 
 template <typename T, template <typename Type> class Node>
@@ -107,6 +109,11 @@ BSTBaseIt<T, Node> BSTBaseIt<T, Node>::getParent() const {
     if (!isValid())
         throw std::runtime_error("Tried to get parent of null node");
     return BSTBaseIt(currentNode_->parent);
+}
+
+template <typename T, template <typename Type> class Node>
+void BSTBaseIt<T, Node>::invalidate() {
+    currentNode_ = nullptr;
 }
 
 #include "BSTBase.h"

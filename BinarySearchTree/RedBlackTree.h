@@ -90,7 +90,7 @@ template <typename T>
 void RedBlackTree<T>::erase(iterator& it) {
     if (this->getPtr(it) != nullptr) {
         erase(this->getPtr(it));
-        this->invalidateIterator(it);
+        it.invalidate();
     }
 }
 
@@ -98,7 +98,7 @@ template <typename T>
 void RedBlackTree<T>::erase(iterator&& it) {
     if (this->getPtr(it) != nullptr) {
         erase(this->getPtr(it));
-        this->invalidateIterator(it);
+        it.invalidate();
     }
 }
 

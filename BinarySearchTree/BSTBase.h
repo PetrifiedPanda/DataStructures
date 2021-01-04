@@ -60,7 +60,6 @@ class BSTBase {
     std::unique_ptr<Node<T>>& getUnique(Node<T>* node);
 
     Node<T>* getPtr(iterator it);
-    void invalidateIterator(iterator& it);
 
     Node<T>* insertAndReturnNewNode(const T& key);
     void erase(Node<T>* toDelete);
@@ -152,7 +151,7 @@ template <typename T, template <typename> class Node>
 void BSTBase<T, Node>::erase(iterator& it) {
     if (it.currentNode_ != nullptr) {
         erase(it.currentNode_);
-        invalidateIterator(it);
+        it.invalidate();
     }
 }
 
@@ -160,7 +159,7 @@ template <typename T, template <typename> class Node>
 void BSTBase<T, Node>::erase(iterator&& it) {
     if (it.currentNode_ != nullptr) {
         erase(it.currentNode_);
-        invalidateIterator(it);
+        it.invalidate();
     }
 }
 
@@ -278,11 +277,6 @@ std::unique_ptr<Node<T>>& BSTBase<T, Node>::getUnique(Node<T>* node) {  // Can't
 template <typename T, template <typename> class Node>
 Node<T>* BSTBase<T, Node>::getPtr(iterator it) {
     return it.currentNode_;
-}
-
-template <typename T, template <typename> class Node>
-void BSTBase<T, Node>::invalidateIterator(iterator& it) {
-    it.currentNode_ = nullptr;
 }
 
 template <typename T, template <typename> class Node>
