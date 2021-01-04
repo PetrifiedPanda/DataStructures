@@ -40,6 +40,7 @@ class SplayTree : public BinarySearchTree<T> {
 template <typename T>
 SplayTree<T>& SplayTree<T>::operator=(const SplayTree<T>& tree) {
     BinarySearchTree<T>::operator=(tree);
+    return *this;
 }
 
 template <typename T>

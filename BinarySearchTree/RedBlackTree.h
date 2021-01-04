@@ -43,6 +43,7 @@ class RedBlackTree : public RBTreeBase<T> {
 template <typename T>
 RedBlackTree<T>& RedBlackTree<T>::operator=(const RedBlackTree<T>& other) {
     RBTreeBase<T>::operator=(other);
+    return *this;
 }
 
 template <typename T>
