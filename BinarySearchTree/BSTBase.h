@@ -116,6 +116,8 @@ BSTBase<T, Node>& BSTBase<T, Node>::operator=(const BSTBase<T, Node>& tree) {
 
     for (const T& item : preorderVec)
         insert(item);
+    
+    return *this;
 }
 
 template <typename T, template <typename> class Node>
