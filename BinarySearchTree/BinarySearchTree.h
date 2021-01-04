@@ -4,4 +4,10 @@
 #include "TreeNode.h"
 
 template <typename T>
-using BinarySearchTree = BSTBase<T, TreeNode>;
+class BSTNode {
+   public:
+    BasicTreeNode(BSTNode, T);
+};
+
+template <typename T>
+using BinarySearchTree = BSTBase<T, BSTNode>;

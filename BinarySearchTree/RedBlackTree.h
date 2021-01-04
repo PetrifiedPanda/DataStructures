@@ -1,7 +1,20 @@
 #pragma once
 
 #include "BSTBase.h"
-#include "RBTreeNode.h"
+
+#include "TreeNode.h"
+
+template <typename T>
+class RBTreeNode {
+   public:
+    enum Color {
+        BLACK,
+        RED
+    };
+
+    Color color;
+    TreeNode(RBTreeNode, T, color(RED));
+};
 
 template <typename T>
 using RBTreeBase = BSTBase<T, RBTreeNode>;

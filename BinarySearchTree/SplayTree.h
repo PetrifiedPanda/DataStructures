@@ -23,16 +23,16 @@ class SplayTree : public BinarySearchTree<T> {
     iterator find(const T& key);
 
    private:
-    void erase(TreeNode<T>* node);
+    void erase(BSTNode<T>* node);
 
-    void splay(TreeNode<T>* node);
+    void splay(BSTNode<T>* node);
 
-    void splayUpTo(TreeNode<T>* node, TreeNode<T>* newParent);
+    void splayUpTo(BSTNode<T>* node, BSTNode<T>* newParent);
 
-    void zigZig(TreeNode<T>* node);
-    void zigZag(TreeNode<T>* node);
+    void zigZig(BSTNode<T>* node);
+    void zigZag(BSTNode<T>* node);
 
-    void zig(TreeNode<T>* node);
+    void zig(BSTNode<T>* node);
 };
 
 // Assignment operators
@@ -60,14 +60,14 @@ void SplayTree<T>::insert(const T& key) {
 
 template <typename T>
 void SplayTree<T>::erase(const T& key) {
-    TreeNode<T>* keyNode = this->findNode(key);
+    BSTNode<T>* keyNode = this->findNode(key);
     if (keyNode != nullptr)
         erase(keyNode);
 }
 
 template <typename T>
 void SplayTree<T>::erase(iterator& it) {
-    TreeNode<T>* itNode = this->getPtr(it);
+    BSTNode<T>* itNode = this->getPtr(it);
     if (itNode != nullptr) {
         erase(itNode);
         this->invalidateIterator(it);
@@ -76,7 +76,7 @@ void SplayTree<T>::erase(iterator& it) {
 
 template <typename T>
 void SplayTree<T>::erase(iterator&& it) {
-    TreeNode<T>* itNode = this->getPtr(it);
+    BSTNode<T>* itNode = this->getPtr(it);
     if (itNode != nullptr) {
         erase(itNode);
         this->invalidateIterator(it);
@@ -87,14 +87,14 @@ void SplayTree<T>::erase(iterator&& it) {
 
 template <typename T>
 typename SplayTree<T>::iterator SplayTree<T>::find(const T& key) {
-    TreeNode<T>* keyNode = this->findNode(key);
+    BSTNode<T>* keyNode = this->findNode(key);
     if (keyNode != nullptr)
         splay(keyNode);
     return iterator(keyNode);
 }
 
 template <typename T>
-void SplayTree<T>::erase(TreeNode<T>* node) {
+void SplayTree<T>::erase(BSTNode<T>* node) {
     splay(node);
 
     if (node->left == nullptr) {
@@ -102,7 +102,7 @@ void SplayTree<T>::erase(TreeNode<T>* node) {
     } else if (node->right == nullptr) {
         this->transplant(node, node->left);
     } else {
-        TreeNode<T>* leftMax = this->subtreeMax(node->left.get());
+        BSTNode<T>* leftMax = this->subtreeMax(node->left.get());
         splayUpTo(leftMax, node);
         leftMax->right = std::move(node->right);
         leftMax->right->parent = leftMax;
@@ -113,12 +113,12 @@ void SplayTree<T>::erase(TreeNode<T>* node) {
 // Splay operations and helpers
 
 template <typename T>
-void SplayTree<T>::splay(TreeNode<T>* node) {
+void SplayTree<T>::splay(BSTNode<T>* node) {
     splayUpTo(node, nullptr);
 }
 
 template <typename T>
-void SplayTree<T>::splayUpTo(TreeNode<T>* node, TreeNode<T>* newParent) {
+void SplayTree<T>::splayUpTo(BSTNode<T>* node, BSTNode<T>* newParent) {
     while (node->parent != newParent) {
         if (node->parent->parent == newParent)
             zig(node);
@@ -131,7 +131,7 @@ void SplayTree<T>::splayUpTo(TreeNode<T>* node, TreeNode<T>* newParent) {
 }
 
 template <typename T>
-void SplayTree<T>::zigZig(TreeNode<T>* node) {
+void SplayTree<T>::zigZig(BSTNode<T>* node) {
     if (node == node->parent->left.get()) {
         this->rotateRight(node->parent->parent);
         this->rotateRight(node->parent);
@@ -142,7 +142,7 @@ void SplayTree<T>::zigZig(TreeNode<T>* node) {
 }
 
 template <typename T>
-void SplayTree<T>::zigZag(TreeNode<T>* node) {
+void SplayTree<T>::zigZag(BSTNode<T>* node) {
     if (node == node->parent->left.get()) {
         this->rotateRight(node->parent);
         this->rotateLeft(node->parent);
@@ -153,7 +153,7 @@ void SplayTree<T>::zigZag(TreeNode<T>* node) {
 }
 
 template <typename T>
-void SplayTree<T>::zig(TreeNode<T>* node) {
+void SplayTree<T>::zig(BSTNode<T>* node) {
     if (node == node->parent->left.get())
         this->rotateRight(node->parent);
     else
