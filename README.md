@@ -33,3 +33,6 @@ The reason for this is mostly that I do not think I am knowledgeable enough on t
 
 ## Heap
 This is a normal heap, which uses std::less as a comparator by default. The underlying container used by the heap can be changed, but is set to std::vector by default
+
+## Trie
+This is implemented by nodes that merely store a boolean that determines whether the node is a key. The actual keys are built while traversing the tree via the iterator and can be any container of the generic type T.
