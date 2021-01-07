@@ -11,6 +11,7 @@ set(Sources
     HeapTest.cpp
     SplayTreeTest.cpp
     RedBlackTreeTest.cpp
+    TrieTest.cpp
 )
 
 add_executable(${This} ${Sources})
