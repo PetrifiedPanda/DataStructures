@@ -15,9 +15,10 @@ add_subdirectory(LinkedList)
 add_subdirectory(Heap)
 add_subdirectory(BloomFilter)
 add_subdirectory(BinarySearchTree)
+add_subdirectory(Trie)
 
 add_library(${This} INTERFACE)
-target_link_libraries(${This} INTERFACE BinarySearchTree BloomFilter Heap LinkedList)
+target_link_libraries(${This} INTERFACE BinarySearchTree BloomFilter Heap LinkedList Trie)
 target_include_directories(${This} INTERFACE ./)
 
 add_subdirectory(test)
