@@ -95,8 +95,8 @@ size_t Heap<T, Comp, Container>::size() {
 
 template <typename T, class Comp, class Container>
 void Heap<T, Comp, Container>::downHeapify(size_t startIndex) {
-    int maxIndex = startIndex;
-    int prevIndex = -1;
+    size_t maxIndex = startIndex;
+    size_t prevIndex = -1;
     while (maxIndex != prevIndex) {
         prevIndex = maxIndex;
 
