@@ -7,6 +7,8 @@ project(${This})
 set(CMAKE_C_STANDARD 99)
 set(CMAKE_CXX_STANDARD 17)
 
+set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
+
 add_subdirectory(googletest)
 
 enable_testing()

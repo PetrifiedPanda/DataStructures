@@ -144,6 +144,7 @@ void LinkedList<T>::erase(iterator position) {  // O(1)
             tail_ = nullptr;
         } else {
             head_ = std::move(head_->next);
+            head_->prev = nullptr;
         }
     }
 
