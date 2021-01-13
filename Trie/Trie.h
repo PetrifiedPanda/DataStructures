@@ -53,10 +53,10 @@ class Trie {
 // Constructors
 
 template <typename T>
-Trie<T>::Trie() : root_(new TrieNode<T>(false)) {}
+Trie<T>::Trie() : root_(nullptr) {}
 
 template <typename T>
-Trie<T>::Trie(const Trie<T>& other) : root_(copySubtree(other.root_)) {}
+Trie<T>::Trie(const Trie<T>& other) : root_(other.root_ == nullptr ? nullptr : copySubtree(other.root_)) {}
 
 template <typename T>
 Trie<T>::Trie(Trie<T>&& other) noexcept : root_(other.root_) {
@@ -74,6 +74,11 @@ Trie<T>::~Trie() {
 template <typename T>
 Trie<T>& Trie<T>::operator=(const Trie<T>& other) {
     freeSubtree(root_);
+    if (other.root_ == nullptr)
+        root_ = nullptr;
+    else
+        root_ = copySubtree(other.root_);
+    return *this;
 }
 
 template <typename T>
@@ -81,6 +86,7 @@ Trie<T>& Trie<T>::operator=(Trie<T>&& other) {
     freeSubtree(root_);
     root_ = other.root_;
     other.root_ = nullptr;
+    return *this;
 }
 
 // Insertion, deletion
@@ -88,6 +94,8 @@ Trie<T>& Trie<T>::operator=(Trie<T>&& other) {
 template <typename T>
 template <typename Container>
 void Trie<T>::insert(const Container& sequence) {
+    if (root_ == nullptr)
+        root_ = new TrieNode<T>(false);
     TrieNode<T>* iterator = root_;
     for (const T& item : sequence) {
         if (iterator->children.count(item) == 0)
@@ -174,6 +182,8 @@ TrieNode<T>* Trie<T>::copySubtree(const TrieNode<T>* subtreeRoot) {
 template <typename T>
 template <typename Container>
 TrieNode<T>* Trie<T>::findNode(const Container& sequence) const {
+    if (root_ == nullptr)
+        return nullptr;
     TrieNode<T>* iterator = root_;
     for (const T& item : sequence) {
         if (iterator->children.count(item) == 0)
