@@ -30,7 +30,7 @@ class TrieNodeIt {
     const Container& sequence() const;
 
     void enter(const T& item); // TODO: Find better name
-    void enterIfValid(const T& item);
+    bool enterIfValid(const T& item);
 
     void removeLast();
 };
@@ -106,11 +106,13 @@ void TrieNodeIt<T, Container>::enter(const T& item) {
 }
 
 template <typename T, typename Container>
-void TrieNodeIt<T, Container>::enterIfValid(const T& item) {
+bool TrieNodeIt<T, Container>::enterIfValid(const T& item) {
     if (currentNode_->children.count(item) > 0) {
         currentNode_ = currentNode_->children[item];
         sequence_.push_back(item);
-    }
+        return true;
+    } else 
+        return false;
 }
 
 template <typename T, typename Container>
