@@ -37,6 +37,10 @@ class Trie {
     ContContainer keysWithPrefix(const Container& prefix) const;
 
    private:
+    void free();
+    void copy(const Trie<T>& other);
+    void move(Trie<T>&& other) noexcept;
+
     void freeSubtree(TrieNode<T>* subtreeRoot);
     TrieNode<T>* copySubtree(const TrieNode<T>* subtreeRoot);
 
@@ -56,36 +60,33 @@ template <typename T>
 Trie<T>::Trie() : root_(nullptr) {}
 
 template <typename T>
-Trie<T>::Trie(const Trie<T>& other) : root_(other.root_ == nullptr ? nullptr : copySubtree(other.root_)) {}
+Trie<T>::Trie(const Trie<T>& other) {
+    copy(other);
+}
 
 template <typename T>
-Trie<T>::Trie(Trie<T>&& other) noexcept : root_(other.root_) {
-    other.root_ = nullptr;
+Trie<T>::Trie(Trie<T>&& other) noexcept {
+    move(std::move(other));
 }
 
 template <typename T>
 Trie<T>::~Trie() {
-    if (root_ != nullptr)
-        freeSubtree(root_);
+    free();
 }
 
 // Assignment operators
 
 template <typename T>
 Trie<T>& Trie<T>::operator=(const Trie<T>& other) {
-    freeSubtree(root_);
-    if (other.root_ == nullptr)
-        root_ = nullptr;
-    else
-        root_ = copySubtree(other.root_);
+    free();
+    copy(other);
     return *this;
 }
 
 template <typename T>
 Trie<T>& Trie<T>::operator=(Trie<T>&& other) {
-    freeSubtree(root_);
-    root_ = other.root_;
-    other.root_ = nullptr;
+    free();
+    move(std::move(other));
     return *this;
 }
 
@@ -160,6 +161,28 @@ ContContainer Trie<T>::keysWithPrefix(const Container& prefix) const {
 
 // private Utility
 
+// Helpers for constructors and destructor
+
+template <typename T>
+void Trie<T>::free() {
+    if (root_ != nullptr)
+        freeSubtree(root_);
+}
+
+template <typename T>
+void Trie<T>::copy(const Trie<T>& other) {
+    if (other.root_ == nullptr)
+        root_ = nullptr;
+    else
+        root_ = copySubtree(other.root_);
+}
+
+template <typename T>
+void Trie<T>::move(Trie<T>&& other) noexcept {
+    root_ = other.root_;
+    other.root_ = nullptr;
+}
+
 template <typename T>
 void Trie<T>::freeSubtree(TrieNode<T>* subtreeRoot) {
     for (auto& pair : subtreeRoot->children)
@@ -167,6 +190,8 @@ void Trie<T>::freeSubtree(TrieNode<T>* subtreeRoot) {
         
     delete subtreeRoot;
 }
+
+// Copy, find, erase
 
 template <typename T>
 TrieNode<T>* Trie<T>::copySubtree(const TrieNode<T>* subtreeRoot) {
