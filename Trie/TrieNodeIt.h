@@ -28,6 +28,7 @@ class TrieNodeIt {
     bool isKey() const;
 
     const Container& sequence() const;
+    Container moveSequence();
 
     void enter(const T& item); // TODO: Find better name
     bool enterIfValid(const T& item);
@@ -88,12 +89,19 @@ bool TrieNodeIt<T, Container>::isValid() const {
 
 template <typename T, typename Container>
 bool TrieNodeIt<T, Container>::isKey() const {
-    return currentNode_->isKey;
+    return currentNode_ != nullptr && currentNode_->isKey;
 }
 
 template <typename T, typename Container>
 const Container& TrieNodeIt<T, Container>::sequence() const {
     return sequence_;
+}
+
+// Moves the current sequence out of the iterator, invalidating the iterator in the process
+template <typename T, typename Container>
+Container TrieNodeIt<T, Container>::moveSequence() { // TODO: Maybe rename this method?
+    currentNode_ = nullptr;
+    return std::move(sequence_);
 }
 
 template <typename T, typename Container>
