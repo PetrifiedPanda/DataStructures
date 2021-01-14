@@ -191,8 +191,6 @@ void Trie<T>::freeSubtree(TrieNode<T>* subtreeRoot) {
     delete subtreeRoot;
 }
 
-// Copy, find, erase
-
 template <typename T>
 TrieNode<T>* Trie<T>::copySubtree(const TrieNode<T>* subtreeRoot) {
     TrieNode<T>* result = new TrieNode<T>(subtreeRoot->isKey);
@@ -203,6 +201,8 @@ TrieNode<T>* Trie<T>::copySubtree(const TrieNode<T>* subtreeRoot) {
 
     return result;
 }
+
+// Find and erase helpers
 
 template <typename T>
 template <typename Container>
@@ -234,6 +234,8 @@ bool Trie<T>::eraseRec(TrieNode<T>* currentNode, const Container& sequence, int 
     }
     return !currentNode->isKey && currentNode->children.size() == 0;
 }
+
+// Keys with prefix helper
 
 template <typename T>
 template <typename Container, typename ContContainer>
