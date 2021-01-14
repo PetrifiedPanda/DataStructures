@@ -89,4 +89,10 @@ TEST_F(TrieTests, Search) {
     it.removeLast();
 
     EXPECT_EQ(keyIt, it);
+
+    std::string movedSeq = keyIt.moveSequence();
+    EXPECT_FALSE(keyIt.isValid());
+    EXPECT_FALSE(keyIt.isKey()); // Check if isKey() does not crash when used on an empty iterator
+    
+    EXPECT_EQ(movedSeq, it.sequence());
 }
