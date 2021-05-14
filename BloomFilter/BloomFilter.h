@@ -2,6 +2,7 @@
 
 #include <functional>
 #include <vector>
+#include <string>
 
 class BloomFilter {
     std::vector<unsigned int> data_;

@@ -3,6 +3,7 @@
 #include <cmath>
 #include <functional>
 #include <vector>
+#include <string>
 
 class SBloomFilter {
     std::vector<std::function<size_t(const char&)>> hashes_;
